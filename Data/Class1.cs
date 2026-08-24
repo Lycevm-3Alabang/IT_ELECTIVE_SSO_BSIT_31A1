@@ -1,6 +1,16 @@
-﻿namespace Data;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
-public class Class1
+namespace Data;
+
+public class SsoDbContext : IdentityDbContext<IdentityUser>
 {
+    public SsoDbContext(DbContextOptions<SsoDbContext> options) : base(options)
+    {
+    }
 
+    protected SsoDbContext()
+    {
+    }
 }
