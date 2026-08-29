@@ -22,6 +22,8 @@ public class SsoDbContext : IdentityDbContext<IdentityUser>
 
     public DbSet<TenantApp> Tenants { get; set; }
 
+    public DbSet<UserGroup> UserGroups { get; set; }
+
     #endregion
 
 
@@ -30,7 +32,7 @@ public class SsoDbContext : IdentityDbContext<IdentityUser>
     {
         base.OnModelCreating(builder);
 
-        //Configure unique constraint on TenantApp.Name
+     
         builder.Entity<TenantApp>()
             .HasIndex(t => t.Name)
             .IsUnique();
@@ -41,6 +43,23 @@ public class SsoDbContext : IdentityDbContext<IdentityUser>
             builder.Entity<Group>().HasOne(g => g.TenantApp)
             .WithMany(t => t.Groups)
             .HasForeignKey(g => g.TenantAppId);
+
+      
+        builder.Entity<UserGroup>()
+            .HasKey(ug => new { ug.UserId, ug.GroupId });
+
+      
+        builder.Entity<UserGroup>()
+            .HasOne(ug => ug.Group)
+            .WithMany(g => g.UserGroups) 
+            .HasForeignKey(ug => ug.GroupId);
+
+      
+        builder.Entity<UserGroup>()
+            .HasOne<IdentityUser>()
+            .WithMany()
+            .HasForeignKey(ug => ug.UserId);
+
 
     }
 
