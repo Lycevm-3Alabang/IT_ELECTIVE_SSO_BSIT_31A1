@@ -1,6 +1,5 @@
 ﻿namespace Models;
-
-public class userGroup
+public class UserGroup
 {
     public int Id { get; set; }
 }

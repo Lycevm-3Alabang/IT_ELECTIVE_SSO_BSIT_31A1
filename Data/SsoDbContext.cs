@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Models.Entities;
 
 namespace Data;
 
@@ -19,7 +20,7 @@ public class SsoDbContext : IdentityDbContext<IdentityUser>
 
     #region DbSets
 
-    public DbSet<Models.TenantApp> Tenants { get; set; }
+    public DbSet<TenantApp> Tenants { get; set; }
 
     #endregion
 
@@ -30,9 +31,16 @@ public class SsoDbContext : IdentityDbContext<IdentityUser>
         base.OnModelCreating(builder);
 
         //Configure unique constraint on TenantApp.Name
-        builder.Entity<Models.TenantApp>()
+        builder.Entity<TenantApp>()
             .HasIndex(t => t.Name)
             .IsUnique();
+
+            builder.Entity<Group>()
+            .HasIndex(g => new { g.Name, g.TenantAppId }).IsUnique();
+
+            builder.Entity<Group>().HasOne(g => g.TenantApp)
+            .WithMany(t => t.Groups)
+            .HasForeignKey(g => g.TenantAppId);
 
     }
 
