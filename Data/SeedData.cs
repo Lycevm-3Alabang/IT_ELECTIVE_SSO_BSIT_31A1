@@ -18,14 +18,18 @@ public static class SeedData
         {
             return;
         }
+        var existingAdmin = await userManager.FindByEmailAsync(adminEmail);
 
-        var adminUser = new IdentityUser
+        if (existingAdmin == null)
         {
-            UserName = adminEmail,
-            Email = adminEmail,
-            EmailConfirmed = true
-        };
+            var adminUser = new IdentityUser
+            {
+                UserName = adminEmail,
+                Email = adminEmail,
+                EmailConfirmed = true
+            };
 
-        await userManager.CreateAsync(adminUser, adminPassword);
+            await userManager.CreateAsync(adminUser, adminPassword);
+        }
     }
 }
