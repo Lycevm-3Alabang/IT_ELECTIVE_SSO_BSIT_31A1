@@ -5,7 +5,7 @@ using Models.Entities;
 
 namespace Data;
 
-public class SsoDbContext : IdentityDbContext<IdentityUser>
+public class SsoDbContext : IdentityDbContext<ApplicationUser>
 {
     #region Ctor
     public SsoDbContext(DbContextOptions<SsoDbContext> options) : base(options)
@@ -26,27 +26,29 @@ public class SsoDbContext : IdentityDbContext<IdentityUser>
     public DbSet<AuditLog> AuditLogs { get; set; }
     #endregion
 
+
     #region Overrides
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
 
-     
+
         builder.Entity<TenantApp>()
             .HasIndex(t => t.Name)
             .IsUnique();
 
-            builder.Entity<Group>()
-            .HasIndex(g => new { g.Name, g.TenantAppId }).IsUnique();
+        builder.Entity<Group>()
+        .HasIndex(g => new { g.Name, g.TenantAppId }).IsUnique();
 
-            builder.Entity<Group>().HasOne(g => g.TenantApp)
-            .WithMany(t => t.Groups)
-            .HasForeignKey(g => g.TenantAppId);
+        builder.Entity<Group>().HasOne(g => g.TenantApp)
+        .WithMany(t => t.Groups)
+        .HasForeignKey(g => g.TenantAppId);
 
         // Configure UserGroup junction entity composite key
         builder.Entity<UserGroup>()
             .HasKey(ug => new { ug.UserId, ug.GroupId });
 
+        // Configure UserGroup -> Group relationship
         builder.Entity<UserGroup>()
             .HasOne(ug => ug.Group)
             .WithMany()
@@ -54,6 +56,12 @@ public class SsoDbContext : IdentityDbContext<IdentityUser>
 
         builder.Entity<UserGroup>()
             .HasOne<IdentityUser>()
+            .WithMany()
+            .HasForeignKey(ug => ug.UserId);
+
+        // Configure UserGroup -> User relationship 
+        builder.Entity<UserGroup>()
+            .HasOne<ApplicationUser>()
             .WithMany()
             .HasForeignKey(ug => ug.UserId);
     }
