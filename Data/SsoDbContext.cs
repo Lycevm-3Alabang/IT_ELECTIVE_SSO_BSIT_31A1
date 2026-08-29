@@ -21,8 +21,10 @@ public class SsoDbContext : IdentityDbContext<IdentityUser>
     #region DbSets
 
     public DbSet<TenantApp> Tenants { get; set; }
+    public DbSet<Group> Groups { get; set; }
+    public DbSet<UserGroup> UserGroups { get; set; }
+    public DbSet<AuditLog> AuditLogs { get; set; }
     #endregion
-
 
     #region Overrides
     protected override void OnModelCreating(ModelBuilder builder)
@@ -41,6 +43,19 @@ public class SsoDbContext : IdentityDbContext<IdentityUser>
             .WithMany(t => t.Groups)
             .HasForeignKey(g => g.TenantAppId);
 
+        // Configure UserGroup junction entity composite key
+        builder.Entity<UserGroup>()
+            .HasKey(ug => new { ug.UserId, ug.GroupId });
+
+        builder.Entity<UserGroup>()
+            .HasOne(ug => ug.Group)
+            .WithMany()
+            .HasForeignKey(ug => ug.GroupId);
+
+        builder.Entity<UserGroup>()
+            .HasOne<IdentityUser>()
+            .WithMany()
+            .HasForeignKey(ug => ug.UserId);
     }
 
     #endregion
