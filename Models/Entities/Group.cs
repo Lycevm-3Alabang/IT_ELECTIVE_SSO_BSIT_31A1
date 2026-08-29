@@ -12,5 +12,5 @@ public class Group : Auditable
 
     
     public TenantApp TenantApp { get; set; } = null!;
-
+    public ICollection<UserGroup> UserGroups { get; set; } = [];
 }

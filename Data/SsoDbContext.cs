@@ -21,7 +21,6 @@ public class SsoDbContext : IdentityDbContext<IdentityUser>
     #region DbSets
 
     public DbSet<TenantApp> Tenants { get; set; }
-
     #endregion
 
 
@@ -30,7 +29,7 @@ public class SsoDbContext : IdentityDbContext<IdentityUser>
     {
         base.OnModelCreating(builder);
 
-        //Configure unique constraint on TenantApp.Name
+     
         builder.Entity<TenantApp>()
             .HasIndex(t => t.Name)
             .IsUnique();
