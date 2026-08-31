@@ -51,15 +51,10 @@ public class SsoDbContext : IdentityDbContext<ApplicationUser>
         // Configure UserGroup -> Group relationship
         builder.Entity<UserGroup>()
             .HasOne(ug => ug.Group)
-            .WithMany()
+            .WithMany(g => g.UserGroups)
             .HasForeignKey(ug => ug.GroupId);
 
-        builder.Entity<UserGroup>()
-            .HasOne<IdentityUser>()
-            .WithMany()
-            .HasForeignKey(ug => ug.UserId);
-
-        // Configure UserGroup -> User relationship 
+        // Configure UserGroup -> User relationship
         builder.Entity<UserGroup>()
             .HasOne<ApplicationUser>()
             .WithMany()
