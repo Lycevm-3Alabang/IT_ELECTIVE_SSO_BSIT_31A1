@@ -12,8 +12,8 @@ public static class SeedData
         var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         var configuration = serviceProvider.GetRequiredService<IConfiguration>();
 
-        string? adminEmail = configuration["AdminCredentials:Email"];
-        string? adminPassword = configuration["AdminCredentials:Password"];
+        string? adminEmail = configuration["DefaultAdmin:Email"];
+        string? adminPassword = configuration["DefaultAdmin:Password"];
 
         if (string.IsNullOrWhiteSpace(adminEmail) || string.IsNullOrWhiteSpace(adminPassword))
         {
