@@ -32,4 +32,11 @@ public class UsersController : Controller
 
         return View(users);
     }
+
+    // GET /Admin/Users/Create
+    [HttpGet]
+    public IActionResult Create()
+    {
+        return View();
+    }
 }
