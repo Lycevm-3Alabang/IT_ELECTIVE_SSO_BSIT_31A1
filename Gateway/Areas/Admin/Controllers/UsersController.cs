@@ -39,4 +39,38 @@ public class UsersController : Controller
     {
         return View();
     }
+
+    // POST /Admin/Users/Create - create user with hashed password
+    [HttpPost]
+    public async Task<IActionResult> Create(string email, string password)
+    {
+        // Validate duplicate email before create
+        var existingUser = await _userManager.FindByEmailAsync(email);
+        if (existingUser != null)
+        {
+            ModelState.AddModelError("Email", "Email is already registered.");
+            return View();
+        }
+
+        var user = new ApplicationUser
+        {
+            UserName = email,
+            Email = email,
+            EmailConfirmed = true,
+            IsActive = true,
+            CreatedAt = DateTime.Now
+        };
+
+        var result = await _userManager.CreateAsync(user, password);
+        if (!result.Succeeded)
+        {
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+            return View();
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
 }
