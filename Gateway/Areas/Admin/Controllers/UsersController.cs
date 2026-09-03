@@ -14,4 +14,22 @@ public class UsersController : Controller
     {
         _userManager = userManager;
     }
+
+    // GET /Admin/Users
+    [HttpGet]
+    public async Task<IActionResult> Index(int page = 1, int pageSize = 10)
+    {
+        var query = _userManager.Users.OrderByDescending(u => u.CreatedAt);
+        var totalUsers = await query.CountAsync();
+
+        var users = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        ViewBag.CurrentPage = page;
+        ViewBag.TotalPages = (int)Math.Ceiling(totalUsers / (double)pageSize);
+
+        return View(users);
+    }
 }
