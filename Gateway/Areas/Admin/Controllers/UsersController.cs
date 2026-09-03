@@ -83,4 +83,22 @@ public class UsersController : Controller
 
         return View(user);
     }
+
+    // POST /Admin/Users/Delete/{id} - soft delete (set IsActive = false)
+    [HttpPost]
+    public async Task<IActionResult> Delete(string id)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null) return NotFound();
+
+        user.IsActive = false;
+        var result = await _userManager.UpdateAsync(user);
+
+        if (!result.Succeeded)
+        {
+            return BadRequest(result.Errors);
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
 }
