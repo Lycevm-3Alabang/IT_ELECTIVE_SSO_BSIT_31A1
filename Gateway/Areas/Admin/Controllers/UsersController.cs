@@ -73,4 +73,14 @@ public class UsersController : Controller
 
         return RedirectToAction(nameof(Index));
     }
+
+    // GET /Admin/Users/Details/{id} - show user details
+    [HttpGet]
+    public async Task<IActionResult> Details(string id)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null) return NotFound();
+
+        return View(user);
+    }
 }
