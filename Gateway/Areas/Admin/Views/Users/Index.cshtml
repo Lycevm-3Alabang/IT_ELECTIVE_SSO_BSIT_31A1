@@ -1,0 +1,43 @@
+﻿@model IEnumerable<Models.Entities.ApplicationUser>
+
+<h2>Users</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr id="user-row-@user.Id">
+                <td>@user.Email</td>
+                <td>
+                    <label class="toggle-switch">
+                        <input type="checkbox"
+                               class="toggle-active"
+                               data-user-id="@user.Id"
+                               checked="@(user.IsActive)" />
+                        <span id="status-label-@user.Id">
+                            @(user.IsActive ? "Active" : "Suspended")
+                        </span>
+                    </label>
+                </td>
+                <td>@user.CreatedAt.ToShortDateString()</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@user.Id">Details</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div>
+    <button id="prev-page">Previous</button>
+    Page @ViewBag.CurrentPage of @ViewBag.TotalPages
+    <button id="next-page">Next</button>
+</div>
