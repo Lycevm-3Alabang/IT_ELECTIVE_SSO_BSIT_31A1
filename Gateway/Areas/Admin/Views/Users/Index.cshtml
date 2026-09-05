@@ -31,6 +31,10 @@
                 <td>@user.CreatedAt.ToShortDateString()</td>
                 <td>
                     <a asp-action="Details" asp-route-id="@user.Id">Details</a>
+                    <button type="button" data-bs-toggle="modal" data-bs-target="#deleteModal"
+                            data-user-id="@user.Id" data-user-email="@user.Email">
+                        Delete
+                    </button>
                 </td>
             </tr>
         }
@@ -41,6 +45,27 @@
     <button id="prev-page">Previous</button>
     Page @ViewBag.CurrentPage of @ViewBag.TotalPages
     <button id="next-page">Next</button>
+</div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" id="deleteForm" action="/Admin/Users/Delete">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Delete</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to deactivate <strong id="deleteUserEmail"></strong>?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit">Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
@@ -79,6 +104,15 @@
                         checkboxEl.checked = !checkboxEl.checked; // revert on failure
                     });
             });
+        });
+
+        const deleteModal = document.getElementById('deleteModal');
+        deleteModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const userId = button.getAttribute('data-user-id');
+            const userEmail = button.getAttribute('data-user-email');
+            document.getElementById('deleteForm').action = `/Admin/Users/Delete/${userId}`;
+            document.getElementById('deleteUserEmail').textContent = userEmail;
         });
     </script>
 }
