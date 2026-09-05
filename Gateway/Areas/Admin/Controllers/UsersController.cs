@@ -15,7 +15,7 @@ public class UsersController : Controller
         _userManager = userManager;
     }
 
-    // GET /Admin/Users
+// GET /Admin/Users
     [HttpGet]
     public async Task<IActionResult> Index(string? search, int page = 1, int pageSize = 10)
     {
