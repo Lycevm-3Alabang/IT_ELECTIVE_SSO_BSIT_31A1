@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Entities;
+using Data;
+using Gateway.Areas.Admin.Models;
 
 namespace Gateway.Areas.Admin.Controllers;
 
@@ -9,17 +11,27 @@ namespace Gateway.Areas.Admin.Controllers;
 public class UsersController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly SsoDbContext _context;
 
-    public UsersController(UserManager<ApplicationUser> userManager)
+    public UsersController(UserManager<ApplicationUser> userManager, SsoDbContext context)
     {
         _userManager = userManager;
+        _context = context;
     }
 
-    // GET /Admin/Users
+// GET /Admin/Users
     [HttpGet]
-    public async Task<IActionResult> Index(int page = 1, int pageSize = 10)
+    public async Task<IActionResult> Index(string? search, int page = 1, int pageSize = 10)
     {
-        var query = _userManager.Users.OrderByDescending(u => u.CreatedAt);
+        var query = _userManager.Users.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            query = query.Where(u => u.Email != null && u.Email.Contains(search));
+        }
+
+        query = query.OrderByDescending(u => u.CreatedAt);
+
         var totalUsers = await query.CountAsync();
 
         var users = await query
@@ -29,6 +41,7 @@ public class UsersController : Controller
 
         ViewBag.CurrentPage = page;
         ViewBag.TotalPages = (int)Math.Ceiling(totalUsers / (double)pageSize);
+        ViewBag.Search = search;
 
         return View(users);
     }
@@ -42,13 +55,35 @@ public class UsersController : Controller
 
     // POST /Admin/Users/Create - create user with hashed password
     [HttpPost]
-    public async Task<IActionResult> Create(string email, string password)
+    public async Task<IActionResult> Create(string email, string password, string confirmPassword)
     {
-        // Validate duplicate email before create
-        var existingUser = await _userManager.FindByEmailAsync(email);
-        if (existingUser != null)
+        if (string.IsNullOrWhiteSpace(email))
         {
-            ModelState.AddModelError("Email", "Email is already registered.");
+            ModelState.AddModelError("Email", "Email is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            ModelState.AddModelError("Password", "Temporary password is required.");
+        }
+
+        if (password != confirmPassword)
+        {
+            ModelState.AddModelError("ConfirmPassword", "Passwords do not match.");
+        }
+
+        if (!string.IsNullOrWhiteSpace(email))
+        {
+            var existingUser = await _userManager.FindByEmailAsync(email);
+            if (existingUser != null)
+            {
+                ModelState.AddModelError("Email", "Email is already registered.");
+            }
+        }
+
+        if (!ModelState.IsValid)
+        {
+            ViewBag.Email = email;
             return View();
         }
 
@@ -68,6 +103,7 @@ public class UsersController : Controller
             {
                 ModelState.AddModelError(string.Empty, error.Description);
             }
+            ViewBag.Email = email;
             return View();
         }
 
@@ -81,9 +117,30 @@ public class UsersController : Controller
         var user = await _userManager.FindByIdAsync(id);
         if (user == null) return NotFound();
 
-        return View(user);
-    }
+        var groups = await _context.UserGroups
+            .Where(ug => ug.UserId == id)
+            .Include(ug => ug.Group)
+            .ThenInclude(g => g!.TenantApp)
+            .Select(ug => new UserGroupInfo
+            {
+                AppName = ug.Group!.TenantApp.Name ?? string.Empty,
+                GroupName = ug.Group.Name ?? string.Empty,
+                Level = ug.Group.Level
+            })
+            .ToListAsync();
 
+        var model = new UserDetailsViewModel
+        {
+            Id = user.Id,
+            Email = user.Email ?? string.Empty,
+            IsActive = user.IsActive,
+            CreatedAt = user.CreatedAt,
+            LastLoginAt = user.LastLoginAt,
+            Groups = groups
+        };
+
+        return View(model);
+    }
     // POST /Admin/Users/Delete/{id} - soft delete (set IsActive = false)
     [HttpPost]
     public async Task<IActionResult> Delete(string id)
