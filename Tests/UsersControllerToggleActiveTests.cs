@@ -21,7 +21,7 @@ public class UsersControllerToggleActiveTests
         userManagerMock.Setup(m => m.FindByIdAsync("1")).ReturnsAsync(user);
         userManagerMock.Setup(m => m.UpdateAsync(It.IsAny<ApplicationUser>())).ReturnsAsync(IdentityResult.Success);
 
-        var controller = new UsersController(userManagerMock.Object);
+        var controller = new UsersController(userManagerMock.Object, null!);
 
         await controller.ToggleActive("1");
 
@@ -38,7 +38,7 @@ public class UsersControllerToggleActiveTests
         userManagerMock.Setup(m => m.FindByIdAsync("2")).ReturnsAsync(user);
         userManagerMock.Setup(m => m.UpdateAsync(It.IsAny<ApplicationUser>())).ReturnsAsync(IdentityResult.Success);
 
-        var controller = new UsersController(userManagerMock.Object);
+        var controller = new UsersController(userManagerMock.Object, null!);
 
         await controller.ToggleActive("2");
 
@@ -51,7 +51,7 @@ public class UsersControllerToggleActiveTests
         var userManagerMock = MockUserManager();
         userManagerMock.Setup(m => m.FindByIdAsync("missing")).ReturnsAsync((ApplicationUser?)null);
 
-        var controller = new UsersController(userManagerMock.Object);
+        var controller = new UsersController(userManagerMock.Object, null!);
 
         var result = await controller.ToggleActive("missing");
 

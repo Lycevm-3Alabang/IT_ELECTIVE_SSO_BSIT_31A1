@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Data;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Entities;
@@ -9,10 +10,12 @@ namespace Gateway.Areas.Admin.Controllers;
 public class UsersController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;
-
-    public UsersController(UserManager<ApplicationUser> userManager)
+    private readonly SsoDbContext _dbContext;
+    
+    public UsersController(UserManager<ApplicationUser> userManager, SsoDbContext dbContext) 
     {
-        _userManager = userManager;
+        _userManager = userManager; 
+        _dbContext = dbContext; 
     }
 
     // GET /Admin/Users
