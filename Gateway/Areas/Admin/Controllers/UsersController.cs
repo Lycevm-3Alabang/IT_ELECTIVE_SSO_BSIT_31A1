@@ -117,6 +117,12 @@ public class UsersController : Controller
             return BadRequest(result.Errors);
         }
 
+        // AJAX request -> return JSON; form submit -> redirect
+        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+        {
+            return Json(new { id = user.Id, isActive = user.IsActive });
+        }
+
         return RedirectToAction(nameof(Index));
     }
 }
