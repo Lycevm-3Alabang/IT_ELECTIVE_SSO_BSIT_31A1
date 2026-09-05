@@ -17,9 +17,17 @@ public class UsersController : Controller
 
     // GET /Admin/Users
     [HttpGet]
-    public async Task<IActionResult> Index(int page = 1, int pageSize = 10)
+    public async Task<IActionResult> Index(string? search, int page = 1, int pageSize = 10)
     {
-        var query = _userManager.Users.OrderByDescending(u => u.CreatedAt);
+        var query = _userManager.Users.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            query = query.Where(u => u.Email != null && u.Email.Contains(search));
+        }
+
+        query = query.OrderByDescending(u => u.CreatedAt);
+
         var totalUsers = await query.CountAsync();
 
         var users = await query
@@ -29,6 +37,7 @@ public class UsersController : Controller
 
         ViewBag.CurrentPage = page;
         ViewBag.TotalPages = (int)Math.Ceiling(totalUsers / (double)pageSize);
+        ViewBag.Search = search;
 
         return View(users);
     }
