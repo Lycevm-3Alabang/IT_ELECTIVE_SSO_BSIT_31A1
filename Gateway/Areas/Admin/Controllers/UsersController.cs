@@ -44,17 +44,33 @@ public class UsersController : Controller
     [HttpPost]
     public async Task<IActionResult> Create(string email, string password, string confirmPassword)
     {
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            ModelState.AddModelError("Email", "Email is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            ModelState.AddModelError("Password", "Temporary password is required.");
+        }
+
         if (password != confirmPassword)
         {
             ModelState.AddModelError("ConfirmPassword", "Passwords do not match.");
-            return View();
         }
 
-        // Validate duplicate email before create
-        var existingUser = await _userManager.FindByEmailAsync(email);
-        if (existingUser != null)
+        if (!string.IsNullOrWhiteSpace(email))
         {
-            ModelState.AddModelError("Email", "Email is already registered.");
+            var existingUser = await _userManager.FindByEmailAsync(email);
+            if (existingUser != null)
+            {
+                ModelState.AddModelError("Email", "Email is already registered.");
+            }
+        }
+
+        if (!ModelState.IsValid)
+        {
+            ViewBag.Email = email;
             return View();
         }
 
@@ -74,6 +90,7 @@ public class UsersController : Controller
             {
                 ModelState.AddModelError(string.Empty, error.Description);
             }
+            ViewBag.Email = email;
             return View();
         }
 
