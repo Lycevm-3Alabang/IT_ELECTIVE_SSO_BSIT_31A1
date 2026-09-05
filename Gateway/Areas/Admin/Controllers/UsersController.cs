@@ -101,4 +101,28 @@ public class UsersController : Controller
 
         return RedirectToAction(nameof(Index));
     }
+
+    // POST /Admin/Users/ToggleActive/{id}
+    [HttpPost]
+    public async Task<IActionResult> ToggleActive(string id)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null) return NotFound();
+
+        user.IsActive = !user.IsActive;
+        var result = await _userManager.UpdateAsync(user);
+
+        if (!result.Succeeded)
+        {
+            return BadRequest(result.Errors);
+        }
+
+        // AJAX request -> return JSON; form submit -> redirect
+        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+        {
+            return Json(new { id = user.Id, isActive = user.IsActive });
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
 }
