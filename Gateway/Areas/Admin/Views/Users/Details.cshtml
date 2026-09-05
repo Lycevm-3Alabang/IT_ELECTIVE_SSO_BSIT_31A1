@@ -1,0 +1,50 @@
+﻿@model Gateway.Areas.Admin.Models.UserDetailsViewModel
+@{
+    ViewData["Title"] = "User Details";
+}
+
+<h2>User Details</h2>
+
+<dl>
+    <dt>Email</dt>
+    <dd>@Model.Email</dd>
+
+    <dt>Status</dt>
+    <dd>@(Model.IsActive ? "Active" : "Suspended")</dd>
+
+    <dt>Created At</dt>
+    <dd>@Model.CreatedAt.ToString("g")</dd>
+
+    <dt>Last Login</dt>
+    <dd>@(Model.LastLoginAt.HasValue ? Model.LastLoginAt.Value.ToString("g") : "Never logged in")</dd>
+</dl>
+
+<h4>Group Memberships</h4>
+@if (!Model.Groups.Any())
+{
+    <p>This user is not assigned to any groups yet.</p>
+}
+else
+{
+    <table class="table table-sm">
+        <thead>
+            <tr>
+                <th>App</th>
+                <th>Group</th>
+                <th>Power Level</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var g in Model.Groups)
+            {
+                <tr>
+                    <td>@g.AppName</td>
+                    <td>@g.GroupName</td>
+                    <td>@g.Level</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<a asp-action="Index">Back to Users</a>
