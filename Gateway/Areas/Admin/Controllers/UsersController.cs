@@ -42,8 +42,14 @@ public class UsersController : Controller
 
     // POST /Admin/Users/Create - create user with hashed password
     [HttpPost]
-    public async Task<IActionResult> Create(string email, string password)
+    public async Task<IActionResult> Create(string email, string password, string confirmPassword)
     {
+        if (password != confirmPassword)
+        {
+            ModelState.AddModelError("ConfirmPassword", "Passwords do not match.");
+            return View();
+        }
+
         // Validate duplicate email before create
         var existingUser = await _userManager.FindByEmailAsync(email);
         if (existingUser != null)
