@@ -109,6 +109,14 @@ public class UsersController : Controller
         var user = await _userManager.FindByIdAsync(id);
         if (user == null) return NotFound();
 
+        user.IsActive = !user.IsActive;
+        var result = await _userManager.UpdateAsync(user);
+
+        if (!result.Succeeded)
+        {
+            return BadRequest(result.Errors);
+        }
+
         return RedirectToAction(nameof(Index));
     }
 }
