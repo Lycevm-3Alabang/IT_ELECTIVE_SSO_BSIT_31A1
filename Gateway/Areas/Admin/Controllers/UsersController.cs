@@ -101,4 +101,14 @@ public class UsersController : Controller
 
         return RedirectToAction(nameof(Index));
     }
+
+    // POST /Admin/Users/ToggleActive/{id}
+    [HttpPost]
+    public async Task<IActionResult> ToggleActive(string id)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null) return NotFound();
+
+        return RedirectToAction(nameof(Index));
+    }
 }
