@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Entities;
+using Data;
+using Gateway.Areas.Admin.Models;
 
 namespace Gateway.Areas.Admin.Controllers;
 
@@ -9,10 +11,12 @@ namespace Gateway.Areas.Admin.Controllers;
 public class UsersController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly SsoDbContext _context;
 
-    public UsersController(UserManager<ApplicationUser> userManager)
+    public UsersController(UserManager<ApplicationUser> userManager, SsoDbContext context)
     {
         _userManager = userManager;
+        _context = context;
     }
 
     // GET /Admin/Users
@@ -87,9 +91,30 @@ public class UsersController : Controller
         var user = await _userManager.FindByIdAsync(id);
         if (user == null) return NotFound();
 
-        return View(user);
-    }
+        var groups = await _context.UserGroups
+            .Where(ug => ug.UserId == id)
+            .Include(ug => ug.Group)
+            .ThenInclude(g => g!.TenantApp)
+            .Select(ug => new UserGroupInfo
+            {
+                AppName = ug.Group!.TenantApp.Name ?? string.Empty,
+                GroupName = ug.Group.Name ?? string.Empty,
+                Level = ug.Group.Level
+            })
+            .ToListAsync();
 
+        var model = new UserDetailsViewModel
+        {
+            Id = user.Id,
+            Email = user.Email ?? string.Empty,
+            IsActive = user.IsActive,
+            CreatedAt = user.CreatedAt,
+            LastLoginAt = user.LastLoginAt,
+            Groups = groups
+        };
+
+        return View(model);
+    }
     // POST /Admin/Users/Delete/{id} - soft delete (set IsActive = false)
     [HttpPost]
     public async Task<IActionResult> Delete(string id)
