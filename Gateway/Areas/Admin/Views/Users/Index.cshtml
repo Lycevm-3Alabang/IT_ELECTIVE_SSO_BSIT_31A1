@@ -3,6 +3,11 @@
 
 <h2>Users</h2>
 
+<form method="get" asp-action="Index">
+    <input type="text" name="search" value="@ViewBag.Search" placeholder="Search by email..." />
+    <button type="submit">Search</button>
+</form>
+
 <table class="table">
     <thead>
         <tr>
