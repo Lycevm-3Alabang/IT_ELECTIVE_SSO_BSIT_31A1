@@ -28,7 +28,7 @@ public class UsersControllerCreateTests
         userManagerMock.Setup(m => m.CreateAsync(It.IsAny<ApplicationUser>(), "Password123!"))
             .ReturnsAsync(IdentityResult.Success);
 
-        var controller = new UsersController(userManagerMock.Object);
+        var controller = new UsersController(userManagerMock.Object, null!);
 
         var result = await controller.Create("newuser@example.com", "Password123!", "Password123!");
 
@@ -49,7 +49,7 @@ public class UsersControllerCreateTests
         userManagerMock.Setup(m => m.CreateAsync(It.IsAny<ApplicationUser>(), "weak"))
             .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "Password too weak." }));
 
-        var controller = new UsersController(userManagerMock.Object);
+        var controller = new UsersController(userManagerMock.Object, null!);
 
         var result = await controller.Create("baduser@example.com", "weak");
 

@@ -26,7 +26,7 @@ public class UsersControllerDuplicateEmailTests
         userManagerMock.Setup(m => m.FindByEmailAsync("existing@example.com"))
             .ReturnsAsync(new ApplicationUser { Email = "existing@example.com" });
 
-        var controller = new UsersController(userManagerMock.Object);
+        var controller = new UsersController(userManagerMock.Object, null!);
 
         var result = await controller.Create("newuser@example.com", "Password123!", "Password123!");
 
