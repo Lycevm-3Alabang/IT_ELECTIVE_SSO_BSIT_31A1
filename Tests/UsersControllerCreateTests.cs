@@ -51,7 +51,7 @@ public class UsersControllerCreateTests
 
         var controller = new UsersController(userManagerMock.Object, null!);
 
-        var result = await controller.Create("baduser@example.com", "weak");
+        var result = await controller.Create("baduser@example.com", "weak", "weak");
 
         var view = Assert.IsType<ViewResult>(result);
         Assert.False(controller.ModelState.IsValid);
