@@ -1,9 +1,10 @@
 ﻿using Data;
+using Gateway.Areas.Admin.Models;
+using Gateway.Areas.Admin.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Entities;
-using Gateway.Areas.Admin.Models;
 
 namespace Gateway.Areas.Admin.Controllers;
 
@@ -190,9 +191,20 @@ public class UsersController : Controller
         var user = await _userManager.FindByIdAsync(id);
         if (user == null) return NotFound();
 
-        // TODO: password reset logic (Task 3)
+        var temporaryPassword = TemporaryPasswordGenerator.Generate();
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var result = await _userManager.ResetPasswordAsync(user, token, temporaryPassword);
+
+        if (!result.Succeeded)
+        {
+            foreach (var error in result.Errors)
+                ModelState.AddModelError(string.Empty, error.Description);
+
+            return RedirectToAction(nameof(Details), new { id });
+        }
         // TODO: audit log (Task 6)
 
+        TempData["TemporaryPassword"] = temporaryPassword;
         return RedirectToAction(nameof(Details), new { id });
     }
 }
