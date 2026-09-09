@@ -202,7 +202,14 @@ public class UsersController : Controller
 
             return RedirectToAction(nameof(Details), new { id });
         }
-        // TODO: audit log (Task 6)
+        _context.AuditLogs.Add(new AuditLog
+        {
+            UserId = user.Id,
+            Action = "PasswordReset",
+            Details = $"Temporary password issued for {user.Email} by admin.",
+            Timestamp = DateTime.Now
+        });
+        await _context.SaveChangesAsync();
 
         TempData["TemporaryPassword"] = temporaryPassword;
         return RedirectToAction(nameof(Details), new { id });
