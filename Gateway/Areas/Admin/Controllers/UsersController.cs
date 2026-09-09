@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Entities;
-using Data;
 using Gateway.Areas.Admin.Models;
 
 namespace Gateway.Areas.Admin.Controllers;
@@ -182,5 +181,18 @@ public class UsersController : Controller
         }
 
         return RedirectToAction(nameof(Index));
+    }
+
+    // POST /Admin/Users/ResetPassword/{id}
+    [HttpPost]
+    public async Task<IActionResult> ResetPassword(string id)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null) return NotFound();
+
+        // TODO: password reset logic (Task 3)
+        // TODO: audit log (Task 6)
+
+        return RedirectToAction(nameof(Details), new { id });
     }
 }
