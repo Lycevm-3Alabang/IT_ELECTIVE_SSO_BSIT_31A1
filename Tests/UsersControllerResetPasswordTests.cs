@@ -6,6 +6,7 @@ using Moq;
 using Xunit;
 using Microsoft.EntityFrameworkCore;
 using Data;
+using System.Linq;
 
 namespace Data.Tests;
 
@@ -48,5 +49,25 @@ public class UsersControllerResetPasswordTests
         var result = await controller.ResetPassword("missing");
 
         Assert.IsType<NotFoundResult>(result);
+    }
+
+    [Fact]
+    public async Task ResetPassword_ValidUser_CreatesAuditLogEntry()
+    {
+        var user = new ApplicationUser { Id = "u1", Email = "user@example.com" };
+
+        var userManagerMock = MockUserManager();
+        userManagerMock.Setup(m => m.FindByIdAsync("u1")).ReturnsAsync(user);
+        userManagerMock.Setup(m => m.GeneratePasswordResetTokenAsync(user)).ReturnsAsync("fake-token");
+        userManagerMock.Setup(m => m.ResetPasswordAsync(user, "fake-token", It.IsAny<string>()))
+            .ReturnsAsync(IdentityResult.Success);
+
+        var context = NewInMemoryContext();
+        var controller = new UsersController(userManagerMock.Object, context);
+
+        await controller.ResetPassword("u1");
+
+        Assert.Single(context.AuditLogs);
+        Assert.Equal("PasswordReset", context.AuditLogs.First().Action);
     }
 }
