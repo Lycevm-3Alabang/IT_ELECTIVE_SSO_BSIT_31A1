@@ -209,6 +209,10 @@ public class UsersController : Controller
             Details = $"Temporary password issued for {user.Email} by admin.",
             Timestamp = DateTime.Now
         });
+
+        user.MustChangePassword = true;
+        await _userManager.UpdateAsync(user);
+
         await _context.SaveChangesAsync();
 
         TempData["TemporaryPassword"] = temporaryPassword;
