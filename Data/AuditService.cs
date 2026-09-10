@@ -13,7 +13,18 @@ public class AuditService
 
     public async Task LogLogin(string? userId, string email, bool success, string? reason, string? ipAddress)
     {
-        // filled in below
+        if (success)
+        {
+            _context.AuditLogs.Add(new AuditLog
+            {
+                UserId = userId,
+                Action = "LoginSuccess",
+                Details = $"Login succeeded for {email}",
+                Timestamp = DateTime.Now
+            });
+            await _context.SaveChangesAsync();
+            return;
+        }
     }
 
     public async Task LogAction(string? userId, string action, string details)
