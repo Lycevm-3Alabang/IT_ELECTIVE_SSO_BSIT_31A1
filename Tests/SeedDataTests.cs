@@ -16,8 +16,8 @@ public class SeedDataTests
         new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["AdminCredentials:Email"] = "admin@example.com",
-                ["AdminCredentials:Password"] = "AdminPassword123!",
+                ["DefaultAdmin:Email"] = "admin@example.com",
+                ["DefaultAdmin:Password"] = "AdminPassword123!",
             })
             .Build();
 
