@@ -23,12 +23,13 @@ public class UsersControllerDuplicateEmailTests
     public async Task Create_DuplicateEmail_ReturnsViewWithModelError_AndDoesNotCreateUser()
     {
         var userManagerMock = MockUserManager();
+
         userManagerMock.Setup(m => m.FindByEmailAsync("existing@example.com"))
             .ReturnsAsync(new ApplicationUser { Email = "existing@example.com" });
 
         var controller = new UsersController(userManagerMock.Object, null!);
 
-        var result = await controller.Create("newuser@example.com", "Password123!", "Password123!");
+        var result = await controller.Create("existing@example.com", "Password123!", "Password123!");
 
         var view = Assert.IsType<ViewResult>(result);
         Assert.False(controller.ModelState.IsValid);
