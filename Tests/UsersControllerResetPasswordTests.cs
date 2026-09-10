@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Gateway.Areas.Admin.Controllers;
 using Models.Entities;
 using Moq;
@@ -28,10 +29,17 @@ public class UsersControllerResetPasswordTests
         var userManagerMock = MockUserManager();
         userManagerMock.Setup(m => m.FindByIdAsync("u1")).ReturnsAsync(user);
         userManagerMock.Setup(m => m.GeneratePasswordResetTokenAsync(user)).ReturnsAsync("fake-token");
+
         userManagerMock.Setup(m => m.ResetPasswordAsync(user, "fake-token", It.IsAny<string>()))
             .ReturnsAsync(IdentityResult.Success);
 
-        var controller = new UsersController(userManagerMock.Object, NewInMemoryContext());
+        userManagerMock.Setup(m => m.UpdateAsync(user))
+            .ReturnsAsync(IdentityResult.Success);
+
+        var controller = new UsersController(userManagerMock.Object, NewInMemoryContext())
+        {
+            TempData = new Mock<ITempDataDictionary>().Object
+        };
 
         var result = await controller.ResetPassword("u1");
 
@@ -59,11 +67,18 @@ public class UsersControllerResetPasswordTests
         var userManagerMock = MockUserManager();
         userManagerMock.Setup(m => m.FindByIdAsync("u1")).ReturnsAsync(user);
         userManagerMock.Setup(m => m.GeneratePasswordResetTokenAsync(user)).ReturnsAsync("fake-token");
+
         userManagerMock.Setup(m => m.ResetPasswordAsync(user, "fake-token", It.IsAny<string>()))
             .ReturnsAsync(IdentityResult.Success);
 
+        userManagerMock.Setup(m => m.UpdateAsync(user))
+            .ReturnsAsync(IdentityResult.Success);
+
         var context = NewInMemoryContext();
-        var controller = new UsersController(userManagerMock.Object, context);
+        var controller = new UsersController(userManagerMock.Object, context)
+        {
+            TempData = new Mock<ITempDataDictionary>().Object
+        };
 
         await controller.ResetPassword("u1");
 
