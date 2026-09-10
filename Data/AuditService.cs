@@ -22,9 +22,19 @@ public class AuditService
                 Details = $"Login succeeded for {email}",
                 Timestamp = DateTime.Now
             });
-            await _context.SaveChangesAsync();
-            return;
         }
+        else
+        {
+            _context.AuditLogs.Add(new AuditLog
+            {
+                UserId = null,
+                Action = "LoginFailed",
+                Details = $"Login failed for {email}: {reason}",
+                IpAddress = ipAddress,
+                Timestamp = DateTime.Now
+            });
+        }
+        await _context.SaveChangesAsync();
     }
 
     public async Task LogAction(string? userId, string action, string details)
