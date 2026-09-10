@@ -1,10 +1,10 @@
 ﻿using Data;
+using Gateway.Areas.Admin.Models;
+using Gateway.Areas.Admin.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Entities;
-using Data;
-using Gateway.Areas.Admin.Models;
 
 namespace Gateway.Areas.Admin.Controllers;
 
@@ -182,5 +182,40 @@ public class UsersController : Controller
         }
 
         return RedirectToAction(nameof(Index));
+    }
+
+    // POST /Admin/Users/ResetPassword/{id}
+    [HttpPost]
+    public async Task<IActionResult> ResetPassword(string id)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null) return NotFound();
+
+        var temporaryPassword = TemporaryPasswordGenerator.Generate();
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var result = await _userManager.ResetPasswordAsync(user, token, temporaryPassword);
+
+        if (!result.Succeeded)
+        {
+            foreach (var error in result.Errors)
+                ModelState.AddModelError(string.Empty, error.Description);
+
+            return RedirectToAction(nameof(Details), new { id });
+        }
+        _context.AuditLogs.Add(new AuditLog
+        {
+            UserId = user.Id,
+            Action = "PasswordReset",
+            Details = $"Temporary password issued for {user.Email} by admin.",
+            Timestamp = DateTime.Now
+        });
+
+        user.MustChangePassword = true;
+        await _userManager.UpdateAsync(user);
+
+        await _context.SaveChangesAsync();
+
+        TempData["TemporaryPassword"] = temporaryPassword;
+        return RedirectToAction(nameof(Details), new { id });
     }
 }
