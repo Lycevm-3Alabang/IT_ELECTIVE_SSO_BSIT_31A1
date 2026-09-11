@@ -4,8 +4,6 @@ using Gateway.Areas.Admin.Controllers;
 using Models.Entities;
 using Moq;
 using Xunit;
-using Microsoft.EntityFrameworkCore;
-using Data;
 
 namespace Data.Tests;
 
@@ -14,11 +12,6 @@ public class UsersControllerDuplicateEmailTests
     private static Mock<UserManager<ApplicationUser>> MockUserManager() =>
         new(new Mock<IUserStore<ApplicationUser>>().Object, null!, null!, null!, null!, null!, null!, null!, null!);
 
-    private static SsoDbContext NewInMemoryContext() =>
-        new(new DbContextOptionsBuilder<SsoDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options);
-
     [Fact]
     public async Task Create_DuplicateEmail_ReturnsViewWithModelError_AndDoesNotCreateUser()
     {
@@ -26,9 +19,10 @@ public class UsersControllerDuplicateEmailTests
         userManagerMock.Setup(m => m.FindByEmailAsync("existing@example.com"))
             .ReturnsAsync(new ApplicationUser { Email = "existing@example.com" });
 
-        var controller = new UsersController(userManagerMock.Object, null!);
+        // Nulls are safe here because validation fails before the context or AuditService are touched
+        var controller = new UsersController(userManagerMock.Object, null!, null!);
 
-        var result = await controller.Create("newuser@example.com", "Password123!", "Password123!");
+        var result = await controller.Create("existing@example.com", "Password123!", "Password123!");
 
         var view = Assert.IsType<ViewResult>(result);
         Assert.False(controller.ModelState.IsValid);
