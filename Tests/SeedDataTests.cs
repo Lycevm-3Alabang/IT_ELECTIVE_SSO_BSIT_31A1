@@ -33,17 +33,16 @@ public class SeedDataTests
     public async Task InitializeAsync_CreatesAdmin_WhenMissing()
     {
         var userManagerMock = MockUserManager();
-        userManagerMock.Setup(m => m.FindByEmailAsync(It.IsAny<string>()))
-            .ReturnsAsync((ApplicationUser?)null);
-        userManagerMock.Setup(m => m.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
-            .ReturnsAsync(IdentityResult.Success);
+        userManagerMock.Setup(m => m.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync((ApplicationUser?)null);
+        userManagerMock.Setup(m => m.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>())).ReturnsAsync(IdentityResult.Success);
+        userManagerMock.Setup(m => m.AddToRoleAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>())).ReturnsAsync(IdentityResult.Success);
 
         var services = BuildServices(userManagerMock.Object, BuildConfig());
 
         await SeedData.InitializeAsync(services);
 
         userManagerMock.Verify(m => m.CreateAsync(
-            It.Is<ApplicationUser>(u => u.IsActive && u.Email == "admin@example.com"),
+            It.Is<ApplicationUser>(u => u.Email == "admin@example.com" && u.IsActive),
             "AdminPassword123!"), Times.Once);
     }
 
