@@ -23,12 +23,12 @@ public class UsersControllerCreateTests
     public async Task Create_ValidUser_CallsCreateAsyncAndRedirects()
     {
         var userManagerMock = MockUserManager();
-        userManagerMock.Setup(m => m.FindByEmailAsync("newuser@example.com"))
-            .ReturnsAsync((ApplicationUser?)null);
-        userManagerMock.Setup(m => m.CreateAsync(It.IsAny<ApplicationUser>(), "Password123!"))
-            .ReturnsAsync(IdentityResult.Success);
+        userManagerMock.Setup(m => m.FindByEmailAsync("newuser@example.com")).ReturnsAsync((ApplicationUser?)null);
+        userManagerMock.Setup(m => m.CreateAsync(It.IsAny<ApplicationUser>(), "Password123!")).ReturnsAsync(IdentityResult.Success);
 
-        var controller = new UsersController(userManagerMock.Object, null!);
+        var context = NewInMemoryContext();
+        var auditService = new AuditService(context);
+        var controller = new UsersController(userManagerMock.Object, context, auditService);
 
         var result = await controller.Create("newuser@example.com", "Password123!", "Password123!");
 
@@ -44,12 +44,13 @@ public class UsersControllerCreateTests
     public async Task Create_IdentityCreationFails_ReturnsViewWithErrors()
     {
         var userManagerMock = MockUserManager();
-        userManagerMock.Setup(m => m.FindByEmailAsync("baduser@example.com"))
-            .ReturnsAsync((ApplicationUser?)null);
+        userManagerMock.Setup(m => m.FindByEmailAsync("baduser@example.com")).ReturnsAsync((ApplicationUser?)null);
         userManagerMock.Setup(m => m.CreateAsync(It.IsAny<ApplicationUser>(), "weak"))
             .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "Password too weak." }));
 
-        var controller = new UsersController(userManagerMock.Object, null!);
+        var context = NewInMemoryContext();
+        var auditService = new AuditService(context);
+        var controller = new UsersController(userManagerMock.Object, context, auditService);
 
         var result = await controller.Create("baduser@example.com", "weak", "weak");
 

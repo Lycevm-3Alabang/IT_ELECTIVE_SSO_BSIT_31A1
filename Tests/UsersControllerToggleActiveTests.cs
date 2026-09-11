@@ -6,7 +6,6 @@ using Models.Entities;
 using Moq;
 using Xunit;
 using Microsoft.EntityFrameworkCore;
-using Data;
 
 namespace Data.Tests;
 
@@ -20,21 +19,19 @@ public class UsersControllerToggleActiveTests
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options);
 
-    // Task 7: toggle changes IsActive from true → false
     [Fact]
     public async Task ToggleActive_TrueToFalse_UpdatesUser()
     {
-        var user = new ApplicationUser { Id = "1", IsActive = true };
+        var user = new ApplicationUser { Id = "1", Email = "test@example.com", IsActive = true };
         var userManagerMock = MockUserManager();
         userManagerMock.Setup(m => m.FindByIdAsync("1")).ReturnsAsync(user);
         userManagerMock.Setup(m => m.UpdateAsync(It.IsAny<ApplicationUser>())).ReturnsAsync(IdentityResult.Success);
 
-        var controller = new UsersController(userManagerMock.Object, null!)
+        var context = NewInMemoryContext();
+        var auditService = new AuditService(context);
+        var controller = new UsersController(userManagerMock.Object, context, auditService)
         {
-            ControllerContext = new ControllerContext
-            {
-                HttpContext = new DefaultHttpContext()
-            }
+            ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }
         };
 
         await controller.ToggleActive("1");
@@ -43,21 +40,19 @@ public class UsersControllerToggleActiveTests
         userManagerMock.Verify(m => m.UpdateAsync(It.Is<ApplicationUser>(u => !u.IsActive)), Times.Once);
     }
 
-    // Task 8: toggle changes IsActive from false → true
     [Fact]
     public async Task ToggleActive_FalseToTrue_UpdatesUser()
     {
-        var user = new ApplicationUser { Id = "2", IsActive = false };
+        var user = new ApplicationUser { Id = "2", Email = "test2@example.com", IsActive = false };
         var userManagerMock = MockUserManager();
         userManagerMock.Setup(m => m.FindByIdAsync("2")).ReturnsAsync(user);
         userManagerMock.Setup(m => m.UpdateAsync(It.IsAny<ApplicationUser>())).ReturnsAsync(IdentityResult.Success);
 
-        var controller = new UsersController(userManagerMock.Object, null!)
+        var context = NewInMemoryContext();
+        var auditService = new AuditService(context);
+        var controller = new UsersController(userManagerMock.Object, context, auditService)
         {
-            ControllerContext = new ControllerContext
-            {
-                HttpContext = new DefaultHttpContext()
-            }
+            ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }
         };
 
         await controller.ToggleActive("2");
@@ -71,7 +66,7 @@ public class UsersControllerToggleActiveTests
         var userManagerMock = MockUserManager();
         userManagerMock.Setup(m => m.FindByIdAsync("missing")).ReturnsAsync((ApplicationUser?)null);
 
-        var controller = new UsersController(userManagerMock.Object, null!);
+        var controller = new UsersController(userManagerMock.Object, null!, null!);
 
         var result = await controller.ToggleActive("missing");
 
