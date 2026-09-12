@@ -104,6 +104,14 @@
             color: #382943;
             flex-shrink: 0;
         }
+
+        .btn-logout {
+            background: none;
+            border: none;
+            padding: 0;
+            width: 100%;
+            text-align: left;
+        }
         -->
     </style>
 </head>
@@ -154,10 +162,13 @@
             </ul>
         </div>
 
+        <!-- Sidebar Bottom Logout -->
         <div class="p-3">
-            <a href="/Account/Logout" class="nav-link text-white-50 d-flex align-items-center gap-2">
-                <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
-            </a>
+            <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post" id="logoutFormSidebar">
+                <button type="submit" class="nav-link text-white-50 d-flex align-items-center gap-2 btn-logout">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+                </button>
+            </form>
         </div>
     </div>
 
@@ -170,6 +181,7 @@
                 <h5 class="mb-0 fw-bold tracking-tight">DASHBOARD</h5>
             </div>
 
+            <!-- Header Profile Dropdown -->
             <div class="dropdown">
                 <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-dark" data-bs-toggle="dropdown">
                     <div class="bg-light rounded-circle p-2 me-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
@@ -183,6 +195,14 @@
                 <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
                     <li><a class="dropdown-item" href="#">Profile</a></li>
                     <li><a class="dropdown-item" href="#">Settings</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
+                            <button type="submit" class="dropdown-item text-danger d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+                            </button>
+                        </form>
+                    </li>
                 </ul>
             </div>
         </header>
