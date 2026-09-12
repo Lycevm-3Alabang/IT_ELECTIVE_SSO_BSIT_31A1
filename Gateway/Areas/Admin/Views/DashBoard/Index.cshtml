@@ -1,0 +1,304 @@
+﻿@{
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Dashboard";
+    ViewData["ActiveMenu"] = "Dashboard";
+}
+
+<div class="mb-4">
+    <h4 class="fw-bold mb-1">Welcome, Admin User!</h4>
+    <p class="text-secondary small mb-0">Here's what's happening with your SSO Gateway</p>
+</div>
+
+<!-- Key Metrics Row -->
+<div class="row g-3 mb-4">
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card-custom p-3 d-flex align-items-center gap-3">
+            <div class="stat-icon-circle">
+                <i class="fa-regular fa-user"></i>
+            </div>
+            <div>
+                <span class="text-secondary fs-7 d-block">Total Users</span>
+                <h3 class="fw-bold mb-0">126</h3>
+                <small class="text-success fs-8"><i class="fa-solid fa-arrow-up"></i> 12 this month</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card-custom p-3 d-flex align-items-center gap-3">
+            <div class="stat-icon-circle">
+                <i class="fa-solid fa-user-group"></i>
+            </div>
+            <div>
+                <span class="text-secondary fs-7 d-block">Total Groups</span>
+                <h3 class="fw-bold mb-0">14</h3>
+                <small class="text-success fs-8"><i class="fa-solid fa-arrow-up"></i> 5 this month</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card-custom p-3 d-flex align-items-center gap-3">
+            <div class="stat-icon-circle">
+                <i class="fa-solid fa-mobile-screen"></i>
+            </div>
+            <div>
+                <span class="text-secondary fs-7 d-block">Applications</span>
+                <h3 class="fw-bold mb-0">7</h3>
+                <small class="text-success fs-8"><i class="fa-solid fa-arrow-up"></i> 1 this month</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card-custom p-3 d-flex align-items-center gap-3">
+            <div class="stat-icon-circle">
+                <i class="fa-regular fa-pen-to-square"></i>
+            </div>
+            <div>
+                <span class="text-secondary fs-7 d-block">Active</span>
+                <h3 class="fw-bold mb-0">58</h3>
+                <small class="text-success fs-8"><i class="fa-solid fa-arrow-up"></i> 23 this month</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activities & Activity Line Chart -->
+<div class="row g-3 mb-4">
+    <div class="col-12 col-lg-7">
+        <div class="card-custom p-4 h-100">
+            <h6 class="fw-bold mb-3">Recent Activities</h6>
+            <div class="d-flex flex-column gap-3">
+
+                <div class="d-flex align-items-center justify-content-between border-bottom pb-2">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="icon-circle-sm"><i class="fa-solid fa-user-plus"></i></div>
+                        <div>
+                            <div class="fw-bold fs-7">User created</div>
+                            <small class="text-muted">Admin User created user kcer@gmail.com</small>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <div class="fw-semibold fs-7">August 28, 2026</div>
+                        <small class="text-muted">10:30 PM</small>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center justify-content-between border-bottom pb-2">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="icon-circle-sm"><i class="fa-solid fa-user-xmark"></i></div>
+                        <div>
+                            <div class="fw-bold fs-7">User deactivated</div>
+                            <small class="text-muted">Admin User deactivated user sopxciao@gmail.com</small>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <div class="fw-semibold fs-7">August 28, 2026</div>
+                        <small class="text-muted">10:10 AM</small>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center justify-content-between border-bottom pb-2">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="icon-circle-sm"><i class="fa-solid fa-user-group"></i></div>
+                        <div>
+                            <div class="fw-bold fs-7">Group updated</div>
+                            <small class="text-muted">Admin User updated group SalesApp</small>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <div class="fw-semibold fs-7">August 27, 2026</div>
+                        <small class="text-muted">4:30 PM</small>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center justify-content-between border-bottom pb-2">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="icon-circle-sm"><i class="fa-regular fa-user"></i></div>
+                        <div>
+                            <div class="fw-bold fs-7">User logged in</div>
+                            <small class="text-muted">alyahhdev@gmail.com logged in</small>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <div class="fw-semibold fs-7">August 27, 2026</div>
+                        <small class="text-muted">11:10 AM</small>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="icon-circle-sm"><i class="fa-solid fa-mobile-screen"></i></div>
+                        <div>
+                            <div class="fw-bold fs-7">Tenant app created</div>
+                            <small class="text-muted">Admin User created tenant app InventoryApp</small>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <div class="fw-semibold fs-7">August 27, 2026</div>
+                        <small class="text-muted">07:10 AM</small>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Line Chart -->
+    <div class="col-12 col-lg-5">
+        <div class="card-custom p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0">User Activity Overview</h6>
+                <select class="form-select form-select-sm w-auto border-light-subtle">
+                    <option>Last 7 days</option>
+                </select>
+            </div>
+            <div style="height: 250px;">
+                <canvas id="userActivityChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bottom Row Grid -->
+<div class="row g-3">
+    <!-- Users by Top Groups Bar Chart List -->
+    <div class="col-12 col-md-4">
+        <div class="card-custom p-4 h-100">
+            <h6 class="fw-bold mb-4">Users by Top Groups</h6>
+
+            <div class="mb-3">
+                <div class="d-flex justify-content-between fs-7 fw-semibold mb-1">
+                    <span>SalesApp-Admin</span>
+                    <span>80</span>
+                </div>
+                <div class="progress-custom-bg"><div class="progress-custom-fill" style="width: 80%;"></div></div>
+            </div>
+
+            <div class="mb-3">
+                <div class="d-flex justify-content-between fs-7 fw-semibold mb-1">
+                    <span>SalesApp-Manager</span>
+                    <span>70</span>
+                </div>
+                <div class="progress-custom-bg"><div class="progress-custom-fill" style="width: 70%;"></div></div>
+            </div>
+
+            <div class="mb-3">
+                <div class="d-flex justify-content-between fs-7 fw-semibold mb-1">
+                    <span>InventoryApp-User</span>
+                    <span>50</span>
+                </div>
+                <div class="progress-custom-bg"><div class="progress-custom-fill" style="width: 50%;"></div></div>
+            </div>
+
+            <div class="mb-2">
+                <div class="d-flex justify-content-between fs-7 fw-semibold mb-1">
+                    <span>SupportApp-Staff</span>
+                    <span>45</span>
+                </div>
+                <div class="progress-custom-bg"><div class="progress-custom-fill" style="width: 45%;"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Status Donut Chart -->
+    <div class="col-12 col-md-4">
+        <div class="card-custom p-4 h-100">
+            <h6 class="fw-bold mb-3">User Status Overview</h6>
+            <div class="d-flex align-items-center justify-content-center" style="height: 180px;">
+                <canvas id="userStatusChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Applications by Login Bar Chart List -->
+    <div class="col-12 col-md-4">
+        <div class="card-custom p-4 h-100">
+            <h6 class="fw-bold mb-4">Top Applications by Login</h6>
+
+            <div class="mb-3">
+                <div class="d-flex justify-content-between fs-7 fw-semibold mb-1">
+                    <span>SalesApp</span>
+                    <span>96</span>
+                </div>
+                <div class="progress-custom-bg"><div class="progress-custom-fill" style="width: 96%;"></div></div>
+            </div>
+
+            <div class="mb-3">
+                <div class="d-flex justify-content-between fs-7 fw-semibold mb-1">
+                    <span>InventoryApp</span>
+                    <span>83</span>
+                </div>
+                <div class="progress-custom-bg"><div class="progress-custom-fill" style="width: 83%;"></div></div>
+            </div>
+
+            <div class="mb-3">
+                <div class="d-flex justify-content-between fs-7 fw-semibold mb-1">
+                    <span>StudentApp</span>
+                    <span>71</span>
+                </div>
+                <div class="progress-custom-bg"><div class="progress-custom-fill" style="width: 71%;"></div></div>
+            </div>
+
+            <div class="mb-2">
+                <div class="d-flex justify-content-between fs-7 fw-semibold mb-1">
+                    <span>SupportApp</span>
+                    <span>52</span>
+                </div>
+                <div class="progress-custom-bg"><div class="progress-custom-fill" style="width: 52%;"></div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // 1. Line Chart Script
+        const ctxLine = document.getElementById('userActivityChart').getContext('2d');
+        new Chart(ctxLine, {
+            type: 'line',
+            data: {
+                labels: ['00', '10', '20', '30', '40'],
+                datasets: [
+                    { label: 'Login Attempts', data: [5, 20, 25, 27, 34], borderColor: '#382943', tension: 0.3, fill: false },
+                    { label: 'Password Resets', data: [7, 23, 30, 3, 6], borderColor: '#f97316', tension: 0.3, fill: false },
+                    { label: 'Users Created', data: [14, 11, 19, 36, 26], borderColor: '#22c55e', tension: 0.3, fill: false },
+                    { label: 'Users Deactivated', data: [29, 17, 24, 6, 20], borderColor: '#3b82f6', tension: 0.3, fill: false }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { boxWidth: 10, usePointStyle: true } }
+                },
+                scales: {
+                    y: { grid: { borderDash: [4, 4] }, border: { dash: [4,4] } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // 2. Donut Chart Script
+        const ctxDonut = document.getElementById('userStatusChart').getContext('2d');
+        new Chart(ctxDonut, {
+            type: 'doughnut',
+            data: {
+                labels: ['Active (79.7%)', 'Inactive (20.1%)'],
+                datasets: [{
+                    data: [102, 21],
+                    backgroundColor: ['#382943', '#D6CFD9']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right', labels: { boxWidth: 10, usePointStyle: true } }
+                },
+                cutout: '70%'
+            }
+        });
+    </script>
+}
