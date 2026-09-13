@@ -356,3 +356,66 @@
 .admin-legend-dot-light {
     background-color: var(--admin-accent-soft);
 }
+/* ---------- Mobile / Tablet Breakpoints ---------- */
+.admin-sidebar-toggle {
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    z-index: 1050;
+    background-color: var(--admin-sidebar-bg);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
+}
+
+.admin-sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1030;
+}
+
+@media (max-width: 991.98px) {
+    .admin-sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        z-index: 1040;
+        transform: translateX(-100%);
+        transition: transform 0.2s ease-in-out;
+    }
+
+        .admin-sidebar.open {
+            transform: translateX(0);
+        }
+
+    .admin-sidebar-overlay.open {
+        display: block;
+    }
+
+    .admin-topbar {
+        padding: 16px 20px 16px 64px;
+    }
+
+    .admin-content {
+        padding: 20px;
+    }
+
+    .admin-topbar-user-info {
+        display: none;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .admin-topbar-title {
+        font-size: 1.05rem;
+    }
+
+    .admin-content {
+        padding: 16px;
+    }
+}
