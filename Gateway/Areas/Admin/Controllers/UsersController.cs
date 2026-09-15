@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Data;
+using Gateway.Areas.Admin.Models;
+using Gateway.Areas.Admin.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Entities;
-using Data;
-using Gateway.Areas.Admin.Models;
 
 namespace Gateway.Areas.Admin.Controllers;
 
@@ -12,14 +13,16 @@ public class UsersController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SsoDbContext _context;
+    private readonly AuditService _auditService;
 
-    public UsersController(UserManager<ApplicationUser> userManager, SsoDbContext context)
+    public UsersController(UserManager<ApplicationUser> userManager, SsoDbContext context, AuditService auditService)
     {
         _userManager = userManager;
         _context = context;
+        _auditService = auditService;
     }
 
-// GET /Admin/Users
+    // GET /Admin/Users
     [HttpGet]
     public async Task<IActionResult> Index(string? search, int page = 1, int pageSize = 10)
     {
@@ -107,6 +110,8 @@ public class UsersController : Controller
             return View();
         }
 
+        await _auditService.LogAction(user.Id, "UserCreated", $"Admin created account for {user.Email}");
+
         return RedirectToAction(nameof(Index));
     }
 
@@ -174,6 +179,8 @@ public class UsersController : Controller
             return BadRequest(result.Errors);
         }
 
+        await _auditService.LogAction(user.Id, "ToggleActive", $"Set IsActive={user.IsActive} for {user.Email}");
+
         // AJAX request -> return JSON; form submit -> redirect
         if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
         {
@@ -181,5 +188,33 @@ public class UsersController : Controller
         }
 
         return RedirectToAction(nameof(Index));
+    }
+
+    // POST /Admin/Users/ResetPassword/{id}
+    [HttpPost]
+    public async Task<IActionResult> ResetPassword(string id)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null) return NotFound();
+
+        var temporaryPassword = TemporaryPasswordGenerator.Generate();
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var result = await _userManager.ResetPasswordAsync(user, token, temporaryPassword);
+
+        if (!result.Succeeded)
+        {
+            foreach (var error in result.Errors)
+                ModelState.AddModelError(string.Empty, error.Description);
+
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        user.MustChangePassword = true;
+        await _userManager.UpdateAsync(user);
+
+        await _auditService.LogAction(user.Id, "PasswordReset", $"Temporary password issued for {user.Email} by admin.");
+
+        TempData["TemporaryPassword"] = temporaryPassword;
+        return RedirectToAction(nameof(Details), new { id });
     }
 }
