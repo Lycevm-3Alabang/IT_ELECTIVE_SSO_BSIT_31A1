@@ -16,4 +16,16 @@ public class TenantAppsController : Controller
     {
         _context = context;
     }
+
+    // GET /Admin/TenantApps
+    [HttpGet]
+    public async Task<IActionResult> Index()
+    {
+        var apps = await _context.Tenants
+            .OrderBy(t => t.Name)
+            .ToListAsync();
+
+        return View(apps);
+    }
+
 }
