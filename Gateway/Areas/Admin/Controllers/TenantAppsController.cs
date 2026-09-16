@@ -35,4 +35,32 @@ public class TenantAppsController : Controller
         return View();
     }
 
+    // POST /Admin/TenantApps/Create - save app name + return URL
+    [HttpPost]
+    public async Task<IActionResult> Create(string name, string returnUrl)
+    {
+        await ValidateAppAsync(name, returnUrl, excludeId: null);
+
+        if (!ModelState.IsValid)
+        {
+            ViewBag.Name = name;
+            ViewBag.ReturnUrl = returnUrl;
+            return View();
+        }
+
+        var app = new TenantApp
+        {
+            Name = name.Trim(),
+            ReturnUrl = returnUrl.Trim(),
+            IsActive = true,
+            CreatedAt = DateTime.Now,
+            UpdatedAt = DateTime.Now
+        };
+
+        _context.Tenants.Add(app);
+        await _context.SaveChangesAsync();
+
+        return RedirectToAction(nameof(Index));
+    }
+
 }
