@@ -1,6 +1,7 @@
 ﻿using Data;
 using Gateway.Areas.Admin.Models;
 using Gateway.Areas.Admin.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,7 @@ using Models.Entities;
 namespace Gateway.Areas.Admin.Controllers;
 
 [Area("Admin")]
+[Authorize(Roles = SeedData.AdminRole)]
 public class UsersController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;
