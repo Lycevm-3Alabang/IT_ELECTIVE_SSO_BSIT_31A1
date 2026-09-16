@@ -73,4 +73,29 @@ public class TenantAppsController : Controller
         return View(app);
     }
 
+    // POST /Admin/TenantApps/Edit/{id} - update app
+    [HttpPost]
+    public async Task<IActionResult> Edit(int id, string name, string returnUrl)
+    {
+        var app = await _context.Tenants.FindAsync(id);
+        if (app == null) return NotFound();
+
+        await ValidateAppAsync(name, returnUrl, excludeId: id);
+
+        if (!ModelState.IsValid)
+        {
+            app.Name = name;
+            app.ReturnUrl = returnUrl;
+            return View(app);
+        }
+
+        app.Name = name.Trim();
+        app.ReturnUrl = returnUrl.Trim();
+        app.UpdatedAt = DateTime.Now;
+
+        await _context.SaveChangesAsync();
+
+        return RedirectToAction(nameof(Index));
+    }
+
 }
