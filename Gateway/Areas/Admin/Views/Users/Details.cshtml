@@ -5,6 +5,14 @@
 
 <h2>User Details</h2>
 
+@if (TempData["TemporaryPassword"] != null)
+{
+    <div class="alert alert-warning">
+        Temporary password: <code>@TempData["TemporaryPassword"]</code>
+        <button onclick="navigator.clipboard.writeText('@TempData["TemporaryPassword"]')">Copy</button>
+    </div>
+}
+
 <dl>
     <dt>Email</dt>
     <dd>@Model.Email</dd>
@@ -46,5 +54,10 @@ else
         </tbody>
     </table>
 }
+
+<form asp-action="ResetPassword" asp-route-id="@Model.Id" method="post"
+      onsubmit="return confirm('Reset this user's password?');">
+    <button type="submit" class="btn btn-warning">Reset Password</button>
+</form>
 
 <a asp-action="Index">Back to Users</a>

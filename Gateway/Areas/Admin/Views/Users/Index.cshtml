@@ -3,11 +3,6 @@
 
 <h2>Users</h2>
 
-<form method="get" asp-action="Index">
-    <input type="text" name="search" value="@ViewBag.Search" placeholder="Search by email..." />
-    <button type="submit">Search</button>
-</form>
-
 <table class="table">
     <thead>
         <tr>
@@ -45,79 +40,31 @@
         }
     </tbody>
 </table>
-
-<div>
-    <button id="prev-page">Previous</button>
-    Page @ViewBag.CurrentPage of @ViewBag.TotalPages
-    <button id="next-page">Next</button>
-</div>
-
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form method="post" id="deleteForm" action="/Admin/Users/Delete">
-                @Html.AntiForgeryToken()
-                <div class="modal-header">
-                    <h5 class="modal-title">Confirm Delete</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    Are you sure you want to deactivate <strong id="deleteUserEmail"></strong>?
-                </div>
-                <div class="modal-footer">
-                    <button type="button" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit">Delete</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
 @section Scripts {
     <script>
-        document.querySelectorAll('.toggle-active').forEach(function(checkbox) {
-            checkbox.addEventListener('change', function() {
+        document.querySelectorAll('.toggle-active').forEach(function (checkbox) {
+            checkbox.addEventListener('change', function () {
                 const userId = this.dataset.userId;
                 const checkboxEl = this;
-
                 const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+                const headers = { 'X-Requested-With': 'XMLHttpRequest' };
+                if (tokenInput) headers['RequestVerificationToken'] = tokenInput.value;
 
-                const headers = {
-                    'X-Requested-With': 'XMLHttpRequest'
-                };
-                if (tokenInput) {
-                    headers['RequestVerificationToken'] = tokenInput.value;
-                }
-
-                fetch(`/Admin/Users/ToggleActive/${userId}`, {
-                    method: 'POST',
-                    headers: headers
-                })
-                    .then(function(res) {
-                        if (!res.ok) {
-                            throw new Error(`Request failed with status ${res.status}`);
-                        }
+                fetch(`/Admin/Users/ToggleActive/${userId}`, { method: 'POST', headers: headers })
+                    .then(function (res) {
+                        if (!res.ok) throw new Error(`Request failed with status ${res.status}`);
                         return res.json();
                     })
-                    .then(function(data) {
+                    .then(function (data) {
                         document.getElementById(`status-label-${data.id}`).textContent =
                             data.isActive ? 'Active' : 'Suspended';
                     })
-                    .catch(function(error) {
+                    .catch(function (error) {
                         console.error('Toggle failed:', error);
                         alert('Failed to update user status.');
-                        checkboxEl.checked = !checkboxEl.checked; // revert on failure
+                        checkboxEl.checked = !checkboxEl.checked;
                     });
             });
-        });
-
-        const deleteModal = document.getElementById('deleteModal');
-        deleteModal.addEventListener('show.bs.modal', function(event) {
-            const button = event.relatedTarget;
-            const userId = button.getAttribute('data-user-id');
-            const userEmail = button.getAttribute('data-user-email');
-            document.getElementById('deleteForm').action = `/Admin/Users/Delete/${userId}`;
-            document.getElementById('deleteUserEmail').textContent = userEmail;
         });
     </script>
 }
