@@ -98,4 +98,17 @@ public class TenantAppsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    // POST /Admin/TenantApps/Delete/{id} - remove app
+    [HttpPost]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var app = await _context.Tenants.FindAsync(id);
+        if (app == null) return NotFound();
+
+        _context.Tenants.Remove(app);
+        await _context.SaveChangesAsync();
+
+        return RedirectToAction(nameof(Index));
+    }
+
 }
