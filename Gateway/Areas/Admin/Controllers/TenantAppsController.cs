@@ -111,4 +111,27 @@ public class TenantAppsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    // Shared validation used by Create and Edit
+    private async Task ValidateAppAsync(string? name, string? returnUrl, int? excludeId)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            ModelState.AddModelError("Name", "App name is required.");
+        }
+        else
+        {
+            var nameTaken = await _context.Tenants
+                .AnyAsync(t => t.Name != null
+                    && t.Name.ToLower() == name.Trim().ToLower()
+                    && (excludeId == null  t.Id != excludeId));
+
+            if (nameTaken)
+            {
+                ModelState.AddModelError("Name", "An app with this name is already registered.");
+            }
+        }
+
+       
+    }
+
 }
