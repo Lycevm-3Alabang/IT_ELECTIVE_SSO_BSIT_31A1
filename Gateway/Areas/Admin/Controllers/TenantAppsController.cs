@@ -63,4 +63,14 @@ public class TenantAppsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    // GET /Admin/TenantApps/Edit/{id}
+    [HttpGet]
+    public async Task<IActionResult> Edit(int id)
+    {
+        var app = await _context.Tenants.FindAsync(id);
+        if (app == null) return NotFound();
+
+        return View(app);
+    }
+
 }
