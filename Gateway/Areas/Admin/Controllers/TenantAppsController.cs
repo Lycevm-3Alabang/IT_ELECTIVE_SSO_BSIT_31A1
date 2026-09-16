@@ -28,4 +28,11 @@ public class TenantAppsController : Controller
         return View(apps);
     }
 
+    // GET /Admin/TenantApps/Create
+    [HttpGet]
+    public IActionResult Create()
+    {
+        return View();
+    }
+
 }
