@@ -131,7 +131,15 @@ public class TenantAppsController : Controller
             }
         }
 
-       
+        if (string.IsNullOrWhiteSpace(returnUrl))
+        {
+            ModelState.AddModelError("ReturnUrl", "Return URL is required.");
+        }
+        else if (!Uri.TryCreate(returnUrl, UriKind.Absolute, out var uri)
+                 || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+        {
+            ModelState.AddModelError("ReturnUrl", "Return URL must be a valid absolute http or https URL.");
+        }
     }
 
 }
