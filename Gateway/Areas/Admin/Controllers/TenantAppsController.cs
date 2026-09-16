@@ -123,7 +123,7 @@ public class TenantAppsController : Controller
             var nameTaken = await _context.Tenants
                 .AnyAsync(t => t.Name != null
                     && t.Name.ToLower() == name.Trim().ToLower()
-                    && (excludeId == null  t.Id != excludeId));
+                    && (excludeId == null || t.Id != excludeId));
 
             if (nameTaken)
             {
