@@ -71,7 +71,19 @@ public class GroupsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-   
+    // GET /Admin/Groups/Edit/{id}
+    [HttpGet]
+    public async Task<IActionResult> Edit(int id)
+    {
+        var group = await _context.Groups
+            .Include(g => g.TenantApp)
+            .FirstOrDefaultAsync(g => g.Id == id);
+
+        if (group == null) return NotFound();
+
+        await PopulateAppsAsync(group.TenantAppId);
+        return View(group);
+    }
 
     // Fills the app dropdown. Only active, registered apps can own a group.
     private async Task PopulateAppsAsync(int? selectedId = null)
