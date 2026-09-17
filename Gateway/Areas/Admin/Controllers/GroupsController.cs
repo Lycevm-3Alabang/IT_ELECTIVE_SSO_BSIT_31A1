@@ -17,4 +17,18 @@ public class GroupsController : Controller
     {
         _context = context;
     }
+
+    // GET /Admin/Groups
+    [HttpGet]
+    public async Task<IActionResult> Index()
+    {
+        var groups = await _context.Groups
+            .Include(g => g.TenantApp)
+            .OrderBy(g => g.TenantApp.Name)
+            .ThenBy(g => g.Level)
+            .ToListAsync();
+
+        return View(groups);
+    }
+
 }
