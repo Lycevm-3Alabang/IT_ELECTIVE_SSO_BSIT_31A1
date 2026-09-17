@@ -31,4 +31,23 @@ public class ReturnUrlValidatorTests
         Assert.NotNull(result);
         Assert.Equal("SalesApp", result!.Name);
     }
+
+    [Fact]
+    public async Task ValidateAsync_UnregisteredReturnUrl_ReturnsNull()
+    {
+        var context = NewInMemoryContext();
+        context.Tenants.Add(new TenantApp
+        {
+            Name = "SalesApp",
+            ReturnUrl = "https://salesapp.example.com/callback",
+            IsActive = true
+        });
+        await context.SaveChangesAsync();
+
+        var validator = new ReturnUrlValidator(context, new AuditService(context));
+
+        var result = await validator.ValidateAsync("https://not-registered.example.com/callback");
+
+        Assert.Null(result);
+    }
 }
