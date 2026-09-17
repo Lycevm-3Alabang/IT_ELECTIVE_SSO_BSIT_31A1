@@ -31,4 +31,16 @@ public class GroupsController : Controller
         return View(groups);
     }
 
+    // Fills the app dropdown. Only active, registered apps can own a group.
+    private async Task PopulateAppsAsync(int? selectedId = null)
+    {
+        var apps = await _context.Tenants
+            .Where(t => t.IsActive)
+            .OrderBy(t => t.Name)
+            .Select(t => new { t.Id, t.Name })
+            .ToListAsync();
+
+        ViewBag.Apps = new SelectList(apps, "Id", "Name", selectedId);
+    }
+
 }
