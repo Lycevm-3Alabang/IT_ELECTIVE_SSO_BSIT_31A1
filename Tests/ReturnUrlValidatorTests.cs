@@ -50,4 +50,19 @@ public class ReturnUrlValidatorTests
 
         Assert.Null(result);
     }
+
+    [Fact]
+    public async Task ValidateAsync_UnapprovedReturnUrl_IsLoggedToAuditLogs()
+    {
+        var context = NewInMemoryContext();
+        var validator = new ReturnUrlValidator(context, new AuditService(context));
+
+        var result = await validator.ValidateAsync("https://unapproved.example.com/callback");
+
+        Assert.Null(result);
+
+        var log = await context.AuditLogs.SingleAsync();
+        Assert.Equal("UnapprovedReturnUrl", log.Action);
+        Assert.Contains("https://unapproved.example.com/callback", log.Details);
+    }
 }
