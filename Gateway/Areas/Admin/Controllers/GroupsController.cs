@@ -123,6 +123,19 @@ public class GroupsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    // POST /Admin/Groups/Delete/{id} - remove group
+    [HttpPost]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var group = await _context.Groups.FindAsync(id);
+        if (group == null) return NotFound();
+
+        _context.Groups.Remove(group);
+        await _context.SaveChangesAsync();
+
+        return RedirectToAction(nameof(Index));
+    }
+
     // Fills the app dropdown. Only active, registered apps can own a group.
     private async Task PopulateAppsAsync(int? selectedId = null)
     {
