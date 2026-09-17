@@ -31,6 +31,14 @@ public class GroupsController : Controller
         return View(groups);
     }
 
+    // GET /Admin/Groups/Create
+    [HttpGet]
+    public async Task<IActionResult> Create()
+    {
+        await PopulateAppsAsync();
+        return View();
+    }
+
     // POST /Admin/Groups/Create - auto-prefix [AppName]-[GroupName], save level
     [HttpPost]
     public async Task<IActionResult> Create(int tenantAppId, string name, int level)
@@ -73,7 +81,6 @@ public class GroupsController : Controller
 
         return RedirectToAction(nameof(Index));
     }
-
 
     // GET /Admin/Groups/Edit/{id}
     [HttpGet]
@@ -130,7 +137,6 @@ public class GroupsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-
     // POST /Admin/Groups/Delete/{id} - remove group
     [HttpPost]
     public async Task<IActionResult> Delete(int id)
@@ -169,6 +175,26 @@ public class GroupsController : Controller
         }
     }
 
+    // The DB has a unique index on (Name, TenantAppId); this catches the
+    // collision before EF throws, so the admin sees a real message.
+    private async Task ValidateNameUniqueAsync(TenantApp? app, string? name, int? excludeId)
+    {
+        if (app == null || string.IsNullOrWhiteSpace(name)) return;
+
+        var fullName = BuildGroupName(app.Name, name);
+
+        var taken = await _context.Groups
+            .AnyAsync(g => g.TenantAppId == app.Id
+                && g.Name != null
+                && g.Name.ToLower() == fullName.ToLower()
+                && (excludeId == null || g.Id != excludeId));
+
+        if (taken)
+        {
+            ModelState.AddModelError("Name", $"The group \"{fullName}\" already exists for this app.");
+        }
+    }
+
     // Produces "[AppName]-[GroupName]". Idempotent on purpose: re-saving an
     // already-prefixed name (e.g. from the Edit form) won't double-prefix it.
     public static string BuildGroupName(string? appName, string? groupName)
@@ -188,5 +214,4 @@ public class GroupsController : Controller
 
         return $"{prefix}-{suffix}";
     }
-
 }
