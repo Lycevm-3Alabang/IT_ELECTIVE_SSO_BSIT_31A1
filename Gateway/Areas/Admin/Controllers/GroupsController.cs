@@ -47,6 +47,9 @@ public class GroupsController : Controller
             ModelState.AddModelError("Name", "Group name is required.");
         }
 
+        ValidateLevel(level);
+        await ValidateNameUniqueAsync(app, name, excludeId: null);
+
         if (!ModelState.IsValid)
         {
             ViewBag.Name = name;
@@ -70,6 +73,7 @@ public class GroupsController : Controller
 
         return RedirectToAction(nameof(Index));
     }
+
 
     // GET /Admin/Groups/Edit/{id}
     [HttpGet]
@@ -104,6 +108,9 @@ public class GroupsController : Controller
             ModelState.AddModelError("Name", "Group name is required.");
         }
 
+        ValidateLevel(level);
+        await ValidateNameUniqueAsync(app, name, excludeId: id);
+
         if (!ModelState.IsValid)
         {
             group.Name = name;
@@ -122,6 +129,7 @@ public class GroupsController : Controller
 
         return RedirectToAction(nameof(Index));
     }
+
 
     // POST /Admin/Groups/Delete/{id} - remove group
     [HttpPost]
@@ -146,6 +154,19 @@ public class GroupsController : Controller
             .ToListAsync();
 
         ViewBag.Apps = new SelectList(apps, "Id", "Name", selectedId);
+    }
+
+    // 0 = highest power, higher numbers = less power.
+    private void ValidateLevel(int level)
+    {
+        if (level < 0)
+        {
+            ModelState.AddModelError("Level", "Level must be 0 or greater (0 = highest power).");
+        }
+        else if (level > 99)
+        {
+            ModelState.AddModelError("Level", "Level must be 99 or less.");
+        }
     }
 
     // Produces "[AppName]-[GroupName]". Idempotent on purpose: re-saving an
