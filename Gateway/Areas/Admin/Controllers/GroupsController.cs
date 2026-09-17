@@ -85,6 +85,44 @@ public class GroupsController : Controller
         return View(group);
     }
 
+    // POST /Admin/Groups/Edit/{id} - update group
+    [HttpPost]
+    public async Task<IActionResult> Edit(int id, int tenantAppId, string name, int level)
+    {
+        var group = await _context.Groups.FindAsync(id);
+        if (group == null) return NotFound();
+
+        var app = await _context.Tenants.FindAsync(tenantAppId);
+
+        if (app == null)
+        {
+            ModelState.AddModelError("TenantAppId", "Select a registered app.");
+        }
+
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            ModelState.AddModelError("Name", "Group name is required.");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            group.Name = name;
+            group.Level = level;
+            group.TenantAppId = tenantAppId;
+            await PopulateAppsAsync(tenantAppId);
+            return View(group);
+        }
+
+        group.Name = BuildGroupName(app!.Name, name);
+        group.Level = level;
+        group.TenantAppId = tenantAppId;
+        group.UpdatedAt = DateTime.Now;
+
+        await _context.SaveChangesAsync();
+
+        return RedirectToAction(nameof(Index));
+    }
+
     // Fills the app dropdown. Only active, registered apps can own a group.
     private async Task PopulateAppsAsync(int? selectedId = null)
     {
