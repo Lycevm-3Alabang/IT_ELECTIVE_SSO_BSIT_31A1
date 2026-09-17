@@ -17,4 +17,11 @@ public class ReturnUrlValidator
         _context = context;
         _auditService = auditService;
     }
+    // No extra code needed here — this happens automatically.
+    // When Issue 16 adds the login action, e.g.:
+    //
+    //     public IActionResult Login(string? returnUrl) { ... }
+    //
+    // ASP.NET Core's model binder pulls "returnUrl" off the query string
+    // (?returnUrl=https://.../) and passes it in as that parameter for free.
 }
