@@ -24,4 +24,17 @@ public class ReturnUrlValidator
     //
     // ASP.NET Core's model binder pulls "returnUrl" off the query string
     // (?returnUrl=https://.../) and passes it in as that parameter for free.
+
+    public async Task<TenantApp?> ValidateAsync(string? returnUrl)
+    {
+        var normalizedReturnUrl = returnUrl?.Trim();
+
+        var app = await _context.Tenants
+            .Where(t => t.IsActive
+                        && t.ReturnUrl != null
+                        && t.ReturnUrl.ToLower() == normalizedReturnUrl!.ToLower())
+            .FirstOrDefaultAsync();
+
+        return app;
+    }
 }
