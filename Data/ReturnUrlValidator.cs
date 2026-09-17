@@ -27,13 +27,23 @@ public class ReturnUrlValidator
 
     public async Task<TenantApp?> ValidateAsync(string? returnUrl)
     {
-        var normalizedReturnUrl = returnUrl?.Trim();
+        if (string.IsNullOrWhiteSpace(returnUrl))
+        {
+            return null;
+        }
+
+        var normalizedReturnUrl = returnUrl.Trim();
 
         var app = await _context.Tenants
             .Where(t => t.IsActive
                         && t.ReturnUrl != null
-                        && t.ReturnUrl.ToLower() == normalizedReturnUrl!.ToLower())
+                        && t.ReturnUrl.ToLower() == normalizedReturnUrl.ToLower())
             .FirstOrDefaultAsync();
+
+        if (app == null)
+        {
+            return null;
+        }
 
         return app;
     }
