@@ -29,6 +29,10 @@ public class ReturnUrlValidator
     {
         if (string.IsNullOrWhiteSpace(returnUrl))
         {
+            await _auditService.LogAction(
+                userId: null,
+                action: "UnapprovedReturnUrl",
+                details: "Rejected returnUrl: value was missing or empty.");
             return null;
         }
 
@@ -42,6 +46,10 @@ public class ReturnUrlValidator
 
         if (app == null)
         {
+            await _auditService.LogAction(
+                userId: null,
+                action: "UnapprovedReturnUrl",
+                details: $"Rejected unregistered or inactive returnUrl: {normalizedReturnUrl}");
             return null;
         }
 
