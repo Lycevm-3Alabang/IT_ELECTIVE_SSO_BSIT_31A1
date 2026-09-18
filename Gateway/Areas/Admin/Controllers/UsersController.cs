@@ -148,6 +148,38 @@ public class UsersController : Controller
 
         return View(model);
     }
+
+    // GET /Admin/Users/{userId}/Groups - list user's groups
+    [HttpGet("Admin/Users/{userId}/Groups")]
+    public async Task<IActionResult> Groups(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null) return NotFound();
+
+        var assignedGroups = await _context.UserGroups
+            .Where(ug => ug.UserId == userId)
+            .Include(ug => ug.Group)
+            .ThenInclude(g => g!.TenantApp)
+            .Select(ug => new AssignedGroupInfo
+            {
+                GroupId = ug.GroupId,
+                AppName = ug.Group!.TenantApp.Name ?? string.Empty,
+                GroupName = ug.Group.Name ?? string.Empty,
+                Level = ug.Group.Level
+            })
+            .OrderBy(g => g.AppName).ThenBy(g => g.GroupName)
+            .ToListAsync();
+
+        var model = new UserGroupsViewModel
+        {
+            UserId = user.Id,
+            Email = user.Email ?? string.Empty,
+            AssignedGroups = assignedGroups
+        };
+
+        return View(model);
+    }
+
     // POST /Admin/Users/Delete/{id} - soft delete (set IsActive = false)
     [HttpPost]
     public async Task<IActionResult> Delete(string id)
