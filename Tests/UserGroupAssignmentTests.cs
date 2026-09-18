@@ -63,4 +63,26 @@ public class UserGroupAssignmentTests
         Assert.Contains(assignments, a => a.GroupId == groupA.Id);
         Assert.Contains(assignments, a => a.GroupId == groupB.Id);
     }
+
+    [Fact]
+    public async Task UnassignGroup_RemovesRelationship()
+    {
+        var user = new ApplicationUser { Id = "u2", Email = "user2@example.com" };
+        var userManagerMock = MockUserManager();
+        userManagerMock.Setup(m => m.FindByIdAsync("u2")).ReturnsAsync(user);
+
+        var context = NewInMemoryContext();
+        var (groupA, _) = await SeedTwoAppsWithGroups(context);
+        context.UserGroups.Add(new UserGroup { UserId = "u2", GroupId = groupA.Id });
+        await context.SaveChangesAsync();
+
+        var controller = BuildController(context, userManagerMock);
+
+        await controller.UnassignGroup("u2", groupA.Id);
+
+        var stillAssigned = await context.UserGroups
+            .AnyAsync(ug => ug.UserId == "u2" && ug.GroupId == groupA.Id);
+
+        Assert.False(stillAssigned);
+    }
 }
