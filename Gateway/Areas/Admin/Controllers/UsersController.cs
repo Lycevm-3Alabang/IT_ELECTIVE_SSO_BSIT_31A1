@@ -128,12 +128,13 @@ public class UsersController : Controller
             .Where(ug => ug.UserId == id)
             .Include(ug => ug.Group)
             .ThenInclude(g => g!.TenantApp)
-            .Select(ug => new UserGroupInfo
-            {
-                AppName = ug.Group!.TenantApp.Name ?? string.Empty,
-                GroupName = ug.Group.Name ?? string.Empty,
-                Level = ug.Group.Level
-            })
+         .Select(ug => new UserGroupInfo
+         {
+             GroupId = ug.GroupId,
+             AppName = ug.Group!.TenantApp.Name ?? string.Empty,
+             GroupName = ug.Group.Name ?? string.Empty,
+             Level = ug.Group.Level
+         })
             .ToListAsync();
 
         var model = new UserDetailsViewModel
