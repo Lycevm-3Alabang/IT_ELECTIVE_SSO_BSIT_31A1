@@ -85,4 +85,25 @@ public class UserGroupAssignmentTests
 
         Assert.False(stillAssigned);
     }
+
+    [Fact]
+    public async Task AssignGroup_CannotDuplicateAssignment()
+    {
+        var user = new ApplicationUser { Id = "u3", Email = "user3@example.com" };
+        var userManagerMock = MockUserManager();
+        userManagerMock.Setup(m => m.FindByIdAsync("u3")).ReturnsAsync(user);
+
+        var context = NewInMemoryContext();
+        var (groupA, _) = await SeedTwoAppsWithGroups(context);
+        var controller = BuildController(context, userManagerMock);
+
+        await controller.AssignGroup("u3", groupA.Id);
+        await controller.AssignGroup("u3", groupA.Id); // duplicate attempt
+
+        var assignments = await context.UserGroups
+            .Where(ug => ug.UserId == "u3" && ug.GroupId == groupA.Id)
+            .ToListAsync();
+
+        Assert.Single(assignments);
+    }
 }
