@@ -16,6 +16,15 @@ public class HomeController : Controller
         return View();
     }
 
+    // Shown whenever ReturnUrlValidator rejects a returnUrl - the client app
+    // either isn't registered, is disabled, or sent a malformed/missing URL.
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public IActionResult UnapprovedApp(string? returnUrl)
+    {
+        ViewBag.ReturnUrl = returnUrl;
+        return View();
+    }
+
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
