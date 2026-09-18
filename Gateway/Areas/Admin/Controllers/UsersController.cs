@@ -220,6 +220,31 @@ public class UsersController : Controller
         return RedirectToAction(nameof(Groups), new { userId });
     }
 
+    // DELETE /Admin/Users/{userId}/Groups/{groupId} - unassign
+    [HttpDelete("Admin/Users/{userId}/Groups/{groupId}")]
+    public async Task<IActionResult> UnassignGroup(string userId, int groupId)
+    {
+        var userGroup = await _context.UserGroups
+            .FirstOrDefaultAsync(ug => ug.UserId == userId && ug.GroupId == groupId);
+
+        if (userGroup == null) return NotFound();
+
+        var group = await _context.Groups.FindAsync(groupId);
+
+        _context.UserGroups.Remove(userGroup);
+        await _context.SaveChangesAsync();
+
+        await _auditService.LogAction(userId, "GroupUnassigned",
+            $"Removed group '{group?.Name}' from user {userId}");
+
+        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+        {
+            return Json(new { userId, groupId });
+        }
+
+        return RedirectToAction(nameof(Groups), new { userId });
+    }
+
     // POST /Admin/Users/Delete/{id} - soft delete (set IsActive = false)
     [HttpPost]
     public async Task<IActionResult> Delete(string id)
