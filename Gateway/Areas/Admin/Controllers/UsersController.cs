@@ -170,14 +170,54 @@ public class UsersController : Controller
             .OrderBy(g => g.AppName).ThenBy(g => g.GroupName)
             .ToListAsync();
 
+        var assignedIds = assignedGroups.Select(g => g.GroupId).ToHashSet();
+
+        var availableGroups = await _context.Groups
+            .Include(g => g.TenantApp)
+            .Where(g => !assignedIds.Contains(g.Id))
+            .OrderBy(g => g.TenantApp.Name).ThenBy(g => g.Name)
+            .Select(g => new AvailableGroupInfo
+            {
+                GroupId = g.Id,
+                AppName = g.TenantApp.Name ?? string.Empty,
+                GroupName = g.Name ?? string.Empty
+            })
+            .ToListAsync();
+
         var model = new UserGroupsViewModel
         {
             UserId = user.Id,
             Email = user.Email ?? string.Empty,
-            AssignedGroups = assignedGroups
+            AssignedGroups = assignedGroups,
+            AvailableGroups = availableGroups
         };
 
         return View(model);
+    }
+
+    // POST /Admin/Users/{userId}/Groups - assign user to group
+    [HttpPost("Admin/Users/{userId}/Groups")]
+    public async Task<IActionResult> AssignGroup(string userId, int groupId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null) return NotFound();
+
+        var group = await _context.Groups.FindAsync(groupId);
+        if (group == null) return NotFound();
+
+        var alreadyAssigned = await _context.UserGroups
+            .AnyAsync(ug => ug.UserId == userId && ug.GroupId == groupId);
+
+        if (!alreadyAssigned)
+        {
+            _context.UserGroups.Add(new UserGroup { UserId = userId, GroupId = groupId });
+            await _context.SaveChangesAsync();
+
+            await _auditService.LogAction(userId, "GroupAssigned",
+                $"Assigned {user.Email} to group '{group.Name}'");
+        }
+
+        return RedirectToAction(nameof(Groups), new { userId });
     }
 
     // POST /Admin/Users/Delete/{id} - soft delete (set IsActive = false)
