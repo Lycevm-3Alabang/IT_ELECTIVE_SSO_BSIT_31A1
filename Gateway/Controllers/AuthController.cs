@@ -33,6 +33,7 @@ public class AuthController : Controller
         if (!string.IsNullOrWhiteSpace(returnUrl))
         {
             app = await _returnUrlValidator.ValidateAsync(returnUrl);
+            if (app == null) return View("UnapprovedApp");
         }
 
         ViewBag.AppName = app?.Name;
