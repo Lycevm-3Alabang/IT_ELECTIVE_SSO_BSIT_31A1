@@ -70,7 +70,10 @@ public class AuthController : Controller
         }
 
         await _signInManager.SignInAsync(user, isPersistent: false);
-        return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
+        if (app == null)
+        {
+            return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
+        }
 
         var userGroupsForApp = await _context.UserGroups
             .Where(ug => ug.UserId == user.Id)
@@ -78,6 +81,10 @@ public class AuthController : Controller
             .Select(ug => ug.Group!)
             .Where(g => g.TenantAppId == app.Id)
             .ToListAsync();
+
+        var token = _jwtTokenService.CreateToken(user, app.Name ?? "", userGroupsForApp);
+        var sep = returnUrl!.Contains('?') ? "&" : "?";
+        return Redirect($"{returnUrl}{sep}token={token}");
     }
 
 }
