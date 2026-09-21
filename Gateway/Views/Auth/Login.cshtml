@@ -37,6 +37,16 @@
                     }
                 </div>
 
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger py-2">
+                        @foreach (var e in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <div>@e.ErrorMessage</div>
+                        }
+                    </div>
+                }
+
                 <form method="post">
                     <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
 
