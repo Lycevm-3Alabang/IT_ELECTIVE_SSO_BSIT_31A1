@@ -26,6 +26,16 @@
         <div class="auth-panel">
             <div class="auth-card">
                 <h2>Login</h2>
+                <div class="auth-subtitle">
+                    @if (ViewBag.AppName != null)
+                    {
+                        <span>Login to continue to <strong>@ViewBag.AppName</strong></span>
+                    }
+                    else
+                    {
+                        <span>Login to continue to your application</span>
+                    }
+                </div>
 
                 <form method="post">
                     <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
