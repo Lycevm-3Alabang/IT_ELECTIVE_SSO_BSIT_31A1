@@ -1,0 +1,67 @@
+﻿@model Gateway.Areas.Admin.Models.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<h1>Dashboard</h1>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card p-3">
+            <div class="text-muted">Total Users</div>
+            <div class="fs-3 fw-bold">@Model.TotalUsers</div>
+            <small class="text-success">+@Model.NewUsersThisMonth this month</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3">
+            <div class="text-muted">Total Groups</div>
+            <div class="fs-3 fw-bold">@Model.TotalGroups</div>
+            <small class="text-success">+@Model.NewGroupsThisMonth this month</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3">
+            <div class="text-muted">Total Applications</div>
+            <div class="fs-3 fw-bold">@Model.TotalApplications</div>
+            <small class="text-success">+@Model.NewApplicationsThisMonth this month</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3">
+            <div class="text-muted">Active Users</div>
+            <div class="fs-3 fw-bold">@Model.ActiveUserCount</div>
+            <small class="text-muted">@Model.InactiveUserCount inactive</small>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card p-3">
+            <h5>Recent Activity</h5>
+            <ul class="list-group list-group-flush">
+                @foreach (var a in Model.RecentActivities)
+                {
+                    <li class="list-group-item">
+                        <strong>@a.Title</strong> — @a.Description
+                        <div class="text-muted small">@a.Timestamp.ToString("g")</div>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card p-3">
+            <h5>Top Groups</h5>
+            <ul class="list-group list-group-flush">
+                @foreach (var g in Model.TopGroups)
+                {
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>@g.Name</span><span class="badge bg-primary">@g.Count</span>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>
