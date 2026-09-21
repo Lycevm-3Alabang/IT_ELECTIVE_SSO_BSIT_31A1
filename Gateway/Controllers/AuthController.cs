@@ -55,9 +55,9 @@ public class AuthController : Controller
         ViewBag.ReturnUrl = returnUrl;
 
         var user = await _userManager.FindByEmailAsync(email);
-        if (user == null)
+        if (user == null || !user.IsActive)
         {
-            ModelState.AddModelError("", "Invalid email or password.");
+            ModelState.AddModelError("", user != null ? "Account Suspended. Contact your administrator." : "Invalid email or password.");
             return View();
         }
 
