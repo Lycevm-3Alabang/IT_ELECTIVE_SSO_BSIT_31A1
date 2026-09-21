@@ -8,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddScoped<AuditService>();
 builder.Services.AddScoped<ReturnUrlValidator>();
+builder.Services.AddScoped<Gateway.Services.JwtTokenService>();
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<SsoDbContext>(options =>
