@@ -52,26 +52,34 @@ public class AuthController : Controller
             app = await _returnUrlValidator.ValidateAsync(returnUrl);
             if (app == null) return View("UnapprovedApp");
         }
+
         ViewBag.AppName = app?.Name;
         ViewBag.ReturnUrl = returnUrl;
 
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
         var user = await _userManager.FindByEmailAsync(email);
+
         if (user == null || !user.IsActive)
         {
-            ModelState.AddModelError("", user != null
-                ? "Account Suspended. Contact your administrator."
-                : "Invalid email or password.");
+            await _auditService.LogLogin(user?.Id, email, false, user == null ? "User not found" : "Account suspended", ip);
+            ModelState.AddModelError("", user != null ? "Account Suspended. Contact your administrator." : "Invalid email or password.");
             return View();
         }
 
         var result = await _signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure: true);
         if (!result.Succeeded)
         {
+            await _auditService.LogLogin(null, email, false, "Invalid credentials", ip);
             ModelState.AddModelError("", "Invalid email or password.");
             return View();
         }
 
         await _signInManager.SignInAsync(user, isPersistent: false);
+
+        user.LastLoginAt = DateTime.Now;
+        await _userManager.UpdateAsync(user);
+        await _auditService.LogLogin(user.Id, email, true, null, ip);
+
         if (app == null)
         {
             return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
