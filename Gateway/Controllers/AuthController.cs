@@ -29,7 +29,15 @@ public class AuthController : Controller
     [HttpGet]
     public async Task<IActionResult> Login(string? returnUrl)
     {
+        TenantApp? app = null;
+        if (!string.IsNullOrWhiteSpace(returnUrl))
+        {
+            app = await _returnUrlValidator.ValidateAsync(returnUrl);
+        }
+
+        ViewBag.AppName = app?.Name;
         ViewBag.ReturnUrl = returnUrl;
         return View();
     }
+
 }
