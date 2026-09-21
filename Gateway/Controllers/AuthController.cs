@@ -2,6 +2,7 @@
 using Gateway.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Models.Entities;
 
 namespace Gateway.Controllers;
@@ -70,6 +71,13 @@ public class AuthController : Controller
 
         await _signInManager.SignInAsync(user, isPersistent: false);
         return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
+
+        var userGroupsForApp = await _context.UserGroups
+            .Where(ug => ug.UserId == user.Id)
+            .Include(ug => ug.Group)
+            .Select(ug => ug.Group!)
+            .Where(g => g.TenantAppId == app.Id)
+            .ToListAsync();
     }
 
 }
