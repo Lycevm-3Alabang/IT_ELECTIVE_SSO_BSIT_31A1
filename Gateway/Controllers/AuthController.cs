@@ -25,4 +25,11 @@ public class AuthController : Controller
         _auditService = auditService;
         _jwtTokenService = jwtTokenService;
     }
+
+    [HttpGet]
+    public async Task<IActionResult> Login(string? returnUrl)
+    {
+        ViewBag.ReturnUrl = returnUrl;
+        return View();
+    }
 }
