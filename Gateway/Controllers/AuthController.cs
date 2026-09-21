@@ -41,4 +41,35 @@ public class AuthController : Controller
         return View();
     }
 
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Login(string email, string password, string? returnUrl)
+    {
+        TenantApp? app = null;
+        if (!string.IsNullOrWhiteSpace(returnUrl))
+        {
+            app = await _returnUrlValidator.ValidateAsync(returnUrl);
+            if (app == null) return View("UnapprovedApp");
+        }
+        ViewBag.AppName = app?.Name;
+        ViewBag.ReturnUrl = returnUrl;
+
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            ModelState.AddModelError("", "Invalid email or password.");
+            return View();
+        }
+
+        var result = await _signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure: true);
+        if (!result.Succeeded)
+        {
+            ModelState.AddModelError("", "Invalid email or password.");
+            return View();
+        }
+
+        await _signInManager.SignInAsync(user, isPersistent: false);
+        return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
+    }
+
 }
