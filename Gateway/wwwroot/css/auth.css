@@ -1,0 +1,105 @@
+﻿/* Gateway/wwwroot/css/auth.css */
+.auth-page {
+    display: flex;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.auth-brand {
+    flex: 1;
+    background-color: #3F2A47;
+    color: #F0EADA;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 4rem;
+}
+
+    .auth-brand .logo-mark {
+        width: 60px;
+        height: 60px;
+        background: #D9D2D6;
+        border-radius: 6px;
+        margin-bottom: 2rem;
+    }
+
+    .auth-brand h1 {
+        font-size: 2.75rem;
+        font-weight: 800;
+        line-height: 1.15;
+        margin: 0 0 0.75rem 0;
+    }
+
+    .auth-brand .tagline {
+        color: #C9BFC9;
+        font-size: 1.1rem;
+        margin-bottom: 3rem;
+    }
+
+    .auth-brand .pitch {
+        color: #C9BFC9;
+        font-size: 1.15rem;
+        line-height: 1.6;
+    }
+
+.auth-panel {
+    flex: 1;
+    background-color: #F0EADA;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-card {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+    .auth-card h2 {
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+
+    .auth-card .auth-subtitle {
+        color: #6c757d;
+        margin-bottom: 1.75rem;
+    }
+
+    .auth-card label {
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin-bottom: 0.35rem;
+    }
+
+    .auth-card .form-control {
+        border-radius: 8px;
+        padding: 0.65rem 0.85rem;
+        margin-bottom: 1.1rem;
+    }
+
+    .auth-card .auth-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .auth-card .btn-auth {
+        width: 100%;
+        background-color: #3F2A47;
+        border-color: #3F2A47;
+        color: #fff;
+        padding: 0.7rem;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+
+        .auth-card .btn-auth:hover {
+            background-color: #33223A;
+            border-color: #33223A;
+            color: #fff;
+        }
