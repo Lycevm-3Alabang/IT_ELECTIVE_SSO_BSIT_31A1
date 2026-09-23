@@ -1,0 +1,37 @@
+﻿@model IEnumerable<Models.Entities.TenantApp>
+@{
+    ViewData["Title"] = "Tenant Apps";
+}
+
+<h2>Registered Apps</h2>
+
+<a asp-action="Create" class="btn btn-primary mb-3">+ Register New App</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Return URL</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var app in Model)
+        {
+            <tr>
+                <td>@app.Name</td>
+                <td>@app.ReturnUrl</td>
+                <td>@(app.IsActive ? "Active" : "Inactive")</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@app.Id">Edit</a>
+                    <form asp-action="Delete" asp-route-id="@app.Id" method="post" class="d-inline"
+                          onsubmit="return confirm('Delete app \'@app.Name\'? This cannot be undone.');">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-link text-danger p-0 ms-2">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
