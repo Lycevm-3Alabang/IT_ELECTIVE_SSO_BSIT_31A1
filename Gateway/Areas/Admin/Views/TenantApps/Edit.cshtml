@@ -1,0 +1,28 @@
+﻿@model Models.Entities.TenantApp
+@{
+    ViewData["Title"] = "Edit App";
+}
+
+<h2>Edit App</h2>
+
+<form method="post" asp-action="Edit" asp-route-id="@Model.Id">
+    @Html.AntiForgeryToken()
+    <div class="mb-3">
+        <label>App Name</label>
+        <input type="text" name="name" class="form-control" value="@Model.Name" required />
+        @if (ViewData.ModelState["Name"]?.Errors.Count > 0)
+        {
+            <span class="text-danger">@ViewData.ModelState["Name"]!.Errors.First().ErrorMessage</span>
+        }
+    </div>
+    <div class="mb-3">
+        <label>Return URL</label>
+        <input type="text" name="returnUrl" class="form-control" value="@Model.ReturnUrl" required />
+        @if (ViewData.ModelState["ReturnUrl"]?.Errors.Count > 0)
+        {
+            <span class="text-danger">@ViewData.ModelState["ReturnUrl"]!.Errors.First().ErrorMessage</span>
+        }
+    </div>
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
