@@ -73,3 +73,38 @@
         </tbody>
     </table>
 </div>
+
+<!-- Delete confirmation modal (shared by all rows) -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="deleteModalForm" method="post" action="/Admin/TenantApps/Delete/">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete App?</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete <strong id="deleteModalAppName"></strong>?
+                    This action cannot be undone.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete App</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('deleteModal').addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const appId = button.getAttribute('data-app-id');
+            const appName = button.getAttribute('data-app-name');
+            document.getElementById('deleteModalForm').action = `/Admin/TenantApps/Delete/${appId}`;
+            document.getElementById('deleteModalAppName').textContent = appName;
+        });
+    </script>
+}
