@@ -1,0 +1,37 @@
+﻿@model IEnumerable<Models.Entities.Group>
+@{
+    ViewData["Title"] = "Groups";
+}
+
+<h2>Groups</h2>
+
+<a asp-action="Create" class="btn btn-primary mb-3">+ Create Group</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>App</th>
+            <th>Group Name</th>
+            <th>Power Level</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var g in Model)
+        {
+            <tr>
+                <td>@g.TenantApp?.Name</td>
+                <td>@g.Name</td>
+                <td>@g.Level</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@g.Id">Edit</a>
+                    <form asp-action="Delete" asp-route-id="@g.Id" method="post" class="d-inline"
+                          onsubmit="return confirm('Delete group \'@g.Name\'?');">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-link text-danger p-0 ms-2">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
