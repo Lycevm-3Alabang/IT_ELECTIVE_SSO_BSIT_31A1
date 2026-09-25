@@ -53,7 +53,7 @@
                         </a>
                     </td>
                     <td>
-                        <!-- toggle switch -> see Task 6 -->
+                        <!-- toggle switch -->
                         <label class="toggle-switch">
                             <input type="checkbox" class="toggle-active" data-app-id="@app.Id" checked="@(app.IsActive)" />
                         </label>
@@ -62,7 +62,7 @@
                         <a asp-action="Edit" asp-route-id="@app.Id" class="btn btn-sm btn-outline-secondary">
                             <i class="bi bi-pencil"></i> Edit
                         </a>
-                        <!-- Delete button -> opens modal, see Task 4 -->
+                        <!-- Delete button -> opens modal -->
                         <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal"
                                 data-app-id="@app.Id" data-app-name="@app.Name">
                             <i class="bi bi-trash"></i> Delete
@@ -74,7 +74,7 @@
     </table>
 </div>
 
-<!-- Delete confirmation modal (shared by all rows) -->
+<!-- Delete confirmation modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -99,12 +99,42 @@
 
 @section Scripts {
     <script>
+        // Delete Modal Handler
         document.getElementById('deleteModal').addEventListener('show.bs.modal', function (event) {
             const button = event.relatedTarget;
             const appId = button.getAttribute('data-app-id');
             const appName = button.getAttribute('data-app-name');
             document.getElementById('deleteModalForm').action = `/Admin/TenantApps/Delete/${appId}`;
             document.getElementById('deleteModalAppName').textContent = appName;
+        });
+
+        // Toggle Switch Active Status Handler
+        document.querySelectorAll('.toggle-active').forEach(function (checkbox) {
+            checkbox.addEventListener('change', function () {
+                const appId = this.dataset.appId;
+                const checkboxEl = this;
+                const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+                const headers = { 'X-Requested-With': 'XMLHttpRequest' };
+                if (tokenInput) headers['RequestVerificationToken'] = tokenInput.value;
+
+                fetch(`/Admin/TenantApps/ToggleActive/${appId}`, { method: 'POST', headers: headers })
+                    .then(function (res) {
+                        if (!res.ok) throw new Error(`Request failed with status ${res.status}`);
+                        return res.json();
+                    })
+                    .then(function (data) {
+                        const label = document.getElementById(`status-label-${data.id}`);
+                        label.textContent = data.isActive ? 'Active' : 'Inactive';
+                        label.classList.toggle('status-badge-active', data.isActive);
+                        label.classList.toggle('status-badge-inactive', !data.isActive);
+                        checkboxEl.closest('tr').dataset.status = data.isActive ? 'active' : 'inactive';
+                    })
+                    .catch(function (error) {
+                        console.error('Toggle failed:', error);
+                        alert('Failed to update app status.');
+                        checkboxEl.checked = !checkboxEl.checked;
+                    });
+            });
         });
     </script>
 }
