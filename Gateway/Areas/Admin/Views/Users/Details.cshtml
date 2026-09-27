@@ -55,4 +55,23 @@ else
     <i class="bi bi-key-fill"></i> Reset Password
 </button><a asp-action="Index">Back to Users</a>
 
-
+<!-- Reset Password Modal -->
+<div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="resetPasswordModalLabel">Confirm Password Reset</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to reset the password for this user?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form asp-action="ResetPassword" asp-route-id="@Model.Id" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-warning">Reset Password</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
