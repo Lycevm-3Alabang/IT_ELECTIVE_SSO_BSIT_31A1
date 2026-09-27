@@ -7,8 +7,14 @@
 @if (TempData["TemporaryPassword"] != null)
 {
     <div class="alert alert-warning">
-        Temporary password: <code>@TempData["TemporaryPassword"]</code>
-        <button onclick="navigator.clipboard.writeText('@TempData["TemporaryPassword"]')">Copy</button>
+        <label for="tempPasswordField" class="form-label mb-1">Temporary password</label>
+        <div class="input-group" style="max-width: 400px;">
+            <input id="tempPasswordField" type="text" class="form-control" value="@TempData["TemporaryPassword"]" readonly />
+            <button id="copyTempPasswordBtn" type="button" class="btn btn-outline-secondary" data-clipboard-target="#tempPasswordField">
+                <i class="bi bi-clipboard"></i> Copy to Clipboard
+            </button>
+        </div>
+        <small class="text-muted d-block mt-1">This password is shown once. The user will be required to change it on next login.</small>
     </div>
 }
 <dl>
