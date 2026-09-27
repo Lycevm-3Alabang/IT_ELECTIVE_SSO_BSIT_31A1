@@ -1,8 +1,7 @@
 ﻿@model Gateway.Areas.Admin.Models.UserDetailsViewModel
 @{
     ViewData["Title"] = "User Details";
-}
-<h2>User Details</h2>
+}<h2>User Details</h2>
 
 @if (TempData["TemporaryPassword"] != null)
 {
@@ -16,8 +15,7 @@
         </div>
         <small class="text-muted d-block mt-1">This password is shown once. The user will be required to change it on next login.</small>
     </div>
-}
-<dl>
+}<dl>
     <dt>Email</dt>
     <dd>@Model.Email</dd>
 
@@ -28,14 +26,11 @@
     <dd>@Model.CreatedAt.ToString("g")</dd>
 
     <dt>Last Login</dt>
-    <dd>@(Model.LastLoginAt.HasValue ? Model.LastLoginAt.Value.ToString("g") : "Never logged in")</dd>
-</dl>
-<h4>Group Memberships</h4>
+    <dd>@(Model.LastLoginAt.HasValue ? Model.LastLoginAt.Value.ToString("g") : "Never logged in")</dd></dl><h4>Group Memberships</h4>
 @if (!Model.Groups.Any())
 {
     <p>This user is not assigned to any groups yet.</p>
-}
-else
+}else
 {
     <table class="table table-sm">
         <thead>
@@ -56,8 +51,7 @@ else
             }
         </tbody>
     </table>
-}
-<button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#resetPasswordModal">
+}<button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#resetPasswordModal">
     <i class="bi bi-key-fill"></i> Reset Password
 </button><a asp-action="Index">Back to Users</a>
 
@@ -81,3 +75,33 @@ else
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        const copyBtn = document.getElementById('copyTempPasswordBtn');
+        if (copyBtn) {
+            copyBtn.addEventListener('click', function () {
+                const field = document.querySelector(this.dataset.clipboardTarget);
+                if (!field) return;
+
+                navigator.clipboard.writeText(field.value).then(() => {
+                    const originalHtml = copyBtn.innerHTML;
+                    copyBtn.innerHTML = '<i class="bi bi-check2"></i> Copied!';
+                    copyBtn.classList.add('btn-success');
+                    copyBtn.classList.remove('btn-outline-secondary');
+
+                    setTimeout(() => {
+                        copyBtn.innerHTML = originalHtml;
+                        copyBtn.classList.remove('btn-success');
+                        copyBtn.classList.add('btn-outline-secondary');
+                    }, 1500);
+                }).catch(() => {
+                    field.select();
+                    document.execCommand('copy');
+                });
+            });
+        }
+    </script>
+}
+
+
