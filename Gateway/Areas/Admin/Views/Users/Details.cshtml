@@ -2,7 +2,6 @@
 @{
     ViewData["Title"] = "User Details";
 }
-
 <h2>User Details</h2>
 
 @if (TempData["TemporaryPassword"] != null)
@@ -12,7 +11,6 @@
         <button onclick="navigator.clipboard.writeText('@TempData["TemporaryPassword"]')">Copy</button>
     </div>
 }
-
 <dl>
     <dt>Email</dt>
     <dd>@Model.Email</dd>
@@ -26,7 +24,6 @@
     <dt>Last Login</dt>
     <dd>@(Model.LastLoginAt.HasValue ? Model.LastLoginAt.Value.ToString("g") : "Never logged in")</dd>
 </dl>
-
 <h4>Group Memberships</h4>
 @if (!Model.Groups.Any())
 {
@@ -54,10 +51,8 @@ else
         </tbody>
     </table>
 }
+<button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#resetPasswordModal">
+    <i class="bi bi-key-fill"></i> Reset Password
+</button><a asp-action="Index">Back to Users</a>
 
-<form asp-action="ResetPassword" asp-route-id="@Model.Id" method="post"
-      onsubmit="return confirm('Reset this user's password?');">
-    <button type="submit" class="btn btn-warning">Reset Password</button>
-</form>
 
-<a asp-action="Index">Back to Users</a>
