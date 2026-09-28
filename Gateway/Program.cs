@@ -14,7 +14,9 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<SsoDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(o =>
+        Gateway.Services.AuthSecurityOptions.ApplyLockout(o.Lockout))
     .AddEntityFrameworkStores<SsoDbContext>()
     .AddDefaultTokenProviders();
 

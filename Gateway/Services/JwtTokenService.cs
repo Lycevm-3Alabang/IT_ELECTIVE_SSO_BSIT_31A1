@@ -1,6 +1,5 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using Models.Entities;
-using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -26,14 +25,14 @@ public class JwtTokenService
         var iat = new DateTimeOffset(now).ToUnixTimeSeconds().ToString();
 
         var claims = new List<Claim>
-    {
-        new(JwtRegisteredClaimNames.Sub, user.Id),
-        new(JwtRegisteredClaimNames.Email, user.Email ?? ""),
-        new("tenant_app", tenantAppName),
-        new("groups", groupNames),
-        new("levels", JsonSerializer.Serialize(levels)),
-        new(JwtRegisteredClaimNames.Iat, iat, ClaimValueTypes.Integer64)
-    };
+        {
+            new(JwtRegisteredClaimNames.Sub, user.Id),
+            new(JwtRegisteredClaimNames.Email, user.Email ?? ""),
+            new("tenant_app", tenantAppName),
+            new("groups", groupNames),
+            new("levels", JsonSerializer.Serialize(levels)),
+            new(JwtRegisteredClaimNames.Iat, iat, ClaimValueTypes.Integer64)
+        };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
