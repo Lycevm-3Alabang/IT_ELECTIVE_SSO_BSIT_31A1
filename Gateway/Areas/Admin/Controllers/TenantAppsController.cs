@@ -84,9 +84,17 @@ public class TenantAppsController : Controller
 
         if (!ModelState.IsValid)
         {
-            app.Name = name;
-            app.ReturnUrl = returnUrl;
-            return View(app);
+            // Return a DETACHED copy so the tracked entity keeps its old values
+            var formValues = new TenantApp
+            {
+                Id = app.Id,
+                Name = name,
+                ReturnUrl = returnUrl,
+                IsActive = app.IsActive,
+                CreatedAt = app.CreatedAt,
+                UpdatedAt = app.UpdatedAt
+            };
+            return View(formValues);
         }
 
         app.Name = name.Trim();
