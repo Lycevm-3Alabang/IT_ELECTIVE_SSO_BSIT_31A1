@@ -356,6 +356,7 @@
 .admin-legend-dot-light {
     background-color: var(--admin-accent-soft);
 }
+
 /* ---------- Mobile / Tablet Breakpoints ---------- */
 .admin-sidebar-toggle {
     position: fixed;
@@ -418,4 +419,108 @@
     .admin-content {
         padding: 16px;
     }
+}
+
+/* ---------- Tenant Apps UI Additions ---------- */
+.admin-btn-primary {
+    background-color: var(--admin-accent);
+    color: #ffffff;
+    border: none;
+}
+
+    .admin-btn-primary:hover {
+        background-color: var(--admin-sidebar-hover);
+        color: #ffffff;
+    }
+
+.toggle-switch {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    margin: 0;
+}
+
+    .toggle-switch input {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 38px;
+        height: 22px;
+        border-radius: 999px;
+        background-color: #d8d2e0;
+        position: relative;
+        margin: 0;
+        cursor: pointer;
+        transition: background-color 0.15s ease-in-out;
+        flex-shrink: 0;
+    }
+
+        .toggle-switch input::before {
+            content: "";
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background-color: #ffffff;
+            transition: transform 0.15s ease-in-out;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+        }
+
+        .toggle-switch input:checked {
+            background-color: var(--admin-green);
+        }
+
+            .toggle-switch input:checked::before {
+                transform: translateX(16px);
+            }
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+    .status-badge::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+.status-badge-active {
+    background-color: #e3f5ea;
+    color: var(--admin-green);
+}
+
+    .status-badge-active::before {
+        background-color: var(--admin-green);
+    }
+
+.status-badge-inactive {
+    background-color: #f5e3e3;
+    color: #b34747;
+}
+
+    .status-badge-inactive::before {
+        background-color: #b34747;
+    }
+
+.admin-row-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background-color: var(--admin-accent-soft);
+    color: var(--admin-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }

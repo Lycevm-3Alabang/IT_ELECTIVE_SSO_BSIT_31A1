@@ -3,6 +3,14 @@
 
 <h2>Users</h2>
 
+<form method="get" asp-action="Index" class="mb-3 d-flex gap-2">
+    <input type="text" name="search" class="form-control" style="max-width:300px"
+           placeholder="Search by email" value="@ViewBag.Search" />
+    <button type="submit" class="btn btn-secondary">Search</button>
+    <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+    <a asp-action="Create" class="btn btn-primary ms-auto">+ Create User</a>
+</form>
+
 <table class="table">
     <thead>
         <tr>
@@ -31,7 +39,7 @@
                 <td>@user.CreatedAt.ToShortDateString()</td>
                 <td>
                     <a asp-action="Details" asp-route-id="@user.Id">Details</a>
-                    <button type="button" data-bs-toggle="modal" data-bs-target="#deleteModal"
+                    <button type="button" class="btn btn-link text-danger p-0 ms-2" data-bs-toggle="modal" data-bs-target="#deleteModal"
                             data-user-id="@user.Id" data-user-email="@user.Email">
                         Delete
                     </button>
@@ -40,6 +48,42 @@
         }
     </tbody>
 </table>
+
+<div>
+    @if (ViewBag.CurrentPage > 1)
+    {
+        <a asp-action="Index" asp-route-page="@(ViewBag.CurrentPage - 1)" asp-route-search="@ViewBag.Search">Previous</a>
+    }
+    <span>Page @ViewBag.CurrentPage of @ViewBag.TotalPages</span>
+    @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+    {
+        <a asp-action="Index" asp-route-page="@(ViewBag.CurrentPage + 1)" asp-route-search="@ViewBag.Search">Next</a>
+    }
+</div>
+
+<!-- Delete confirmation modal (this was missing — the button had nothing to open) -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="deleteModalForm" method="post" action="/Admin/Users/Delete/">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Delete</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to deactivate <strong id="deleteModalEmail"></strong>?
+                    This sets the account to <em>Suspended</em>; it does not remove it permanently.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
         document.querySelectorAll('.toggle-active').forEach(function (checkbox) {
@@ -65,6 +109,15 @@
                         checkboxEl.checked = !checkboxEl.checked;
                     });
             });
+        });
+
+        // Wire the shared delete modal to whichever row's button was clicked.
+        document.getElementById('deleteModal').addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const userId = button.getAttribute('data-user-id');
+            const userEmail = button.getAttribute('data-user-email');
+            document.getElementById('deleteModalForm').action = `/Admin/Users/Delete/${userId}`;
+            document.getElementById('deleteModalEmail').textContent = userEmail;
         });
     </script>
 }
