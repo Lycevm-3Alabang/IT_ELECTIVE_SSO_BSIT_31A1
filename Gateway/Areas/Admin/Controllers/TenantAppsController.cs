@@ -106,6 +106,27 @@ public class TenantAppsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    // POST /Admin/TenantApps/ToggleActive/{id} - enable/disable app without deleting
+    [HttpPost]
+    public async Task<IActionResult> ToggleActive(int id)
+    {
+        var app = await _context.Tenants.FindAsync(id);
+        if (app == null) return NotFound();
+
+        app.IsActive = !app.IsActive;
+        app.UpdatedAt = DateTime.Now;
+
+        await _context.SaveChangesAsync();
+
+        // AJAX request -> JSON; normal form submit -> redirect
+        if (Request?.Headers["X-Requested-With"].ToString() == "XMLHttpRequest")
+        {
+            return Json(new { id = app.Id, isActive = app.IsActive });
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
+
     // POST /Admin/TenantApps/Delete/{id} - remove app
     [HttpPost]
     public async Task<IActionResult> Delete(int id)
