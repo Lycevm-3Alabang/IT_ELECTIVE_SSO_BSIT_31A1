@@ -1,3 +1,4 @@
+// Gateway/Program.cs  (COMPLETE FILE)
 using Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -14,9 +15,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<SsoDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(o =>
-        Gateway.Services.AuthSecurityOptions.ApplyLockout(o.Lockout))
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<SsoDbContext>()
     .AddDefaultTokenProviders();
 
@@ -24,6 +23,21 @@ builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/";
     options.AccessDeniedPath = "/";
+});
+
+// CORS: allow the registered external client apps to call the SSO gateway
+// (e.g. the mock client app's /api/userinfo calling back, or any AJAX
+// login flow) from a different origin.
+var allowedOrigins = builder.Configuration
+    .GetSection("Cors:AllowedOrigins")
+    .Get<string[]>() ?? Array.Empty<string>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("ClientApps", policy =>
+        policy.WithOrigins(allowedOrigins)
+              .AllowAnyHeader()
+              .AllowAnyMethod());
 });
 
 var app = builder.Build();
@@ -37,6 +51,8 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
+
+app.UseCors("ClientApps");
 
 app.UseAuthentication();
 app.UseAuthorization();
