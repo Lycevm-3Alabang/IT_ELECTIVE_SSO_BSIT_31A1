@@ -67,6 +67,14 @@ public class AuthController : Controller
         }
 
         var result = await _signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure: true);
+
+        if (result.IsLockedOut)
+        {
+            await _auditService.LogLogin(user.Id, email, false, "Account locked out (too many failed attempts)", ip);
+            ModelState.AddModelError("", "Too many failed attempts. Please try again in 15 minutes.");
+            return View();
+        }
+
         if (!result.Succeeded)
         {
             await _auditService.LogLogin(null, email, false, "Invalid credentials", ip);
@@ -96,5 +104,4 @@ public class AuthController : Controller
         var sep = returnUrl!.Contains('?') ? "&" : "?";
         return Redirect($"{returnUrl}{sep}token={token}");
     }
-
 }

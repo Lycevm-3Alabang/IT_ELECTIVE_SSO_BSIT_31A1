@@ -84,9 +84,17 @@ public class TenantAppsController : Controller
 
         if (!ModelState.IsValid)
         {
-            app.Name = name;
-            app.ReturnUrl = returnUrl;
-            return View(app);
+            // Return a DETACHED copy so the tracked entity keeps its old values
+            var formValues = new TenantApp
+            {
+                Id = app.Id,
+                Name = name,
+                ReturnUrl = returnUrl,
+                IsActive = app.IsActive,
+                CreatedAt = app.CreatedAt,
+                UpdatedAt = app.UpdatedAt
+            };
+            return View(formValues);
         }
 
         app.Name = name.Trim();
@@ -94,6 +102,27 @@ public class TenantAppsController : Controller
         app.UpdatedAt = DateTime.Now;
 
         await _context.SaveChangesAsync();
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    // POST /Admin/TenantApps/ToggleActive/{id} - enable/disable app without deleting
+    [HttpPost]
+    public async Task<IActionResult> ToggleActive(int id)
+    {
+        var app = await _context.Tenants.FindAsync(id);
+        if (app == null) return NotFound();
+
+        app.IsActive = !app.IsActive;
+        app.UpdatedAt = DateTime.Now;
+
+        await _context.SaveChangesAsync();
+
+        // AJAX request -> JSON; normal form submit -> redirect
+        if (Request?.Headers["X-Requested-With"].ToString() == "XMLHttpRequest")
+        {
+            return Json(new { id = app.Id, isActive = app.IsActive });
+        }
 
         return RedirectToAction(nameof(Index));
     }
