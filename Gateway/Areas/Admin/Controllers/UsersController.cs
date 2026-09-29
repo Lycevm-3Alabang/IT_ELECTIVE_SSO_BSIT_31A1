@@ -312,7 +312,7 @@ public class UsersController : Controller
         user.MustChangePassword = true;
         await _userManager.UpdateAsync(user);
 
-        await _auditService.LogAction(user.Id, "PasswordReset", $"Temporary password issued for {user.Email} by admin.");
+        await _auditService.LogAction(user.Id, "PasswordReset", $"Temporary password issued for {user.Email} by admin."); //log reset password action
 
         TempData["TemporaryPassword"] = temporaryPassword;
         return RedirectToAction(nameof(Details), new { id });
