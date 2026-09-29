@@ -4,10 +4,11 @@
 }
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>@ViewData["Title"]</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] | IT ELECTIVE - SSO</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
 </head>
@@ -15,7 +16,7 @@
     <div class="auth-page">
         <div class="auth-brand">
             <div class="logo-mark"></div>
-            <h1>IT ELECTIVE<br />SSO</h1>
+            <h1>IT ELECTIVE - SSO</h1>
             <div class="tagline">Centralized Single Sign-On Gateway</div>
             <div class="pitch">
                 Sign in once.<br />
@@ -39,30 +40,31 @@
 
                 @if (!ViewData.ModelState.IsValid)
                 {
-                    <div class="alert alert-danger py-2">
-                        @foreach (var e in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-                        {
-                            <div>@e.ErrorMessage</div>
-                        }
+                    <div class="auth-alert" role="alert">
+                        <strong class="auth-alert-title">Sign-in failed</strong>
+                        <ul class="auth-alert-list">
+                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <li>@error.ErrorMessage</li>
+                            }
+                        </ul>
                     </div>
                 }
 
                 <form method="post">
                     <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
 
-                    <label class="form-label">Email address</label>
-                    <input type="email" name="email" class="form-control" required aria-label="Email address" />
+                    <label for="email" class="form-label">Email address</label>
+                    <input type="email" id="email" name="email" class="form-control"
+                           autocomplete="username" autofocus required />
 
-                    <label class="form-label">Password</label>
-                    <input type="password" name="password" class="form-control" required aria-label="Password" />
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" id="password" name="password" class="form-control"
+                           autocomplete="current-password" required />
 
-                    <div class="auth-row">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="rememberMe" />
-                            <label class="form-check-label" for="rememberMe">Remember me</label>
-                        </div>
-                        <a href="#" class="small text-muted">Forgot Password?</a>
-                    </div>
+                    <p class="auth-help">
+                        Need an account or forgot your password? Contact your SSO administrator.
+                    </p>
 
                     <button type="submit" class="btn btn-auth">Login</button>
                 </form>
