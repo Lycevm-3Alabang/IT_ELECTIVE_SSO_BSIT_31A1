@@ -1,7 +1,10 @@
-// Gateway/Program.cs  (COMPLETE FILE)
+// Gateway/Program.cs (COMPLETE FILE)
+using System.Text;
 using Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Models.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +21,23 @@ builder.Services.AddDbContext<SsoDbContext>(options =>
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<SsoDbContext>()
     .AddDefaultTokenProviders();
+
+// Configure JWT Bearer Authentication alongside ASP.NET Core Identity
+builder.Services.AddAuthentication()
+    .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"], // e.g., "https://localhost:5001" (SSO Gateway)
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidateLifetime = true,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
+            ClockSkew = TimeSpan.Zero
+        };
+    });
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
