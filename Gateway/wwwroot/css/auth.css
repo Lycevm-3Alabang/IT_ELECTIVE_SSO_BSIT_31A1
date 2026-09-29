@@ -130,3 +130,36 @@
     font-size: 0.9rem;
     margin: 0 0 1.5rem;
 }
+/* Issue 17 - accessibility and small screens */
+.auth-card .form-control:focus,
+.auth-card .btn-auth:focus-visible {
+    outline: 3px solid #8A5FA0;
+    outline-offset: 2px;
+    box-shadow: none;
+}
+
+@media (max-width: 767.98px) {
+    .auth-page {
+        flex-direction: column;
+    }
+
+    .auth-brand {
+        padding: 2rem 1.5rem;
+    }
+
+        .auth-brand h1 {
+            font-size: 2rem;
+        }
+
+        .auth-brand .tagline {
+            margin-bottom: 1rem;
+        }
+
+        .auth-brand .pitch {
+            display: none;
+        }
+
+    .auth-panel {
+        padding: 1.5rem 1rem;
+    }
+}

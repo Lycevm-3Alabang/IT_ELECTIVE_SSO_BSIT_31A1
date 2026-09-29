@@ -4,9 +4,10 @@
 }
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] | IT ELECTIVE - SSO</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
@@ -53,11 +54,13 @@
                 <form method="post">
                     <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
 
-                    <label class="form-label">Email address</label>
-                    <input type="email" name="email" class="form-control" required aria-label="Email address" />
+                    <label for="email" class="form-label">Email address</label>
+                    <input type="email" id="email" name="email" class="form-control"
+                           autocomplete="username" autofocus required />
 
-                    <label class="form-label">Password</label>
-                    <input type="password" name="password" class="form-control" required aria-label="Password" />
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" id="password" name="password" class="form-control"
+                           autocomplete="current-password" required />
 
                     <p class="auth-help">
                         Need an account or forgot your password? Contact your SSO administrator.
