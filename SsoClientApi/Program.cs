@@ -104,6 +104,9 @@ app.MapGet("/callback", async (string? token, HttpContext ctx, SsoOptions opts) 
     var result = await new JsonWebTokenHandler().ValidateTokenAsync(token, opts.CreateValidationParameters());
     if (!result.IsValid)
     {
+        if (result.Exception is SecurityTokenExpiredException)
+            return Results.Redirect("/?error=expired");
+
         return Results.Redirect("/?error=invalid_token");
     }
 

@@ -97,3 +97,5 @@ public static class UserInfoMapper
     }
 }
 
+/// <summary>JSON body returned with a 401 from /api/* endpoints.</summary>
+public record ApiError(string Error, string Message, string LoginUrl);
