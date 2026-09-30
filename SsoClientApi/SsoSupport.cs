@@ -51,3 +51,49 @@ public static class SsoTokenRules
     public static bool IsIssuedForApp(ClaimsPrincipal? principal, string expectedApp) =>
         string.Equals(principal?.FindFirst("tenant_app")?.Value, expectedApp, StringComparison.OrdinalIgnoreCase);
 }
+
+public record UserInfoResponse(
+    string? Sub,
+    string? Email,
+    string? TenantApp,
+    string[] Groups,
+    Dictionary<string, int> Levels,
+    DateTimeOffset? ExpiresAt);
+
+public static class UserInfoMapper
+{
+    public static UserInfoResponse FromPrincipal(ClaimsPrincipal user)
+    {
+        // "groups" is a comma-separated string: "SalesApp-Admin,SalesApp-Manager"
+        var groups = (user.FindFirst("groups")?.Value ?? "")
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+        // "levels" is a JSON string inside the JWT: {"SalesApp-Admin":0,"SalesApp-Manager":1}
+        var levels = new Dictionary<string, int>();
+        var levelsJson = user.FindFirst("levels")?.Value;
+        if (!string.IsNullOrWhiteSpace(levelsJson))
+        {
+            try
+            {
+                levels = JsonSerializer.Deserialize<Dictionary<string, int>>(levelsJson) ?? levels;
+            }
+            catch (JsonException)
+            {
+                // malformed claim: return no levels instead of crashing the endpoint
+            }
+        }
+
+        DateTimeOffset? expiresAt = long.TryParse(user.FindFirst("exp")?.Value, out var exp)
+            ? DateTimeOffset.FromUnixTimeSeconds(exp)
+            : null;
+
+        return new UserInfoResponse(
+            user.FindFirst("sub")?.Value,
+            user.FindFirst("email")?.Value,
+            user.FindFirst("tenant_app")?.Value,
+            groups,
+            levels,
+            expiresAt);
+    }
+}
+
