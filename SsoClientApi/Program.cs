@@ -84,4 +84,8 @@ var app = builder.Build();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// GET /api/userinfo : needs a valid token (Bearer header or session cookie)
+app.MapGet("/api/userinfo", (ClaimsPrincipal user) => Results.Ok(UserInfoMapper.FromPrincipal(user)))
+   .RequireAuthorization();
+
 app.Run();
