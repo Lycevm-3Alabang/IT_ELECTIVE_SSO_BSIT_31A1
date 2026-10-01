@@ -69,5 +69,45 @@ public static class SeedData
             testApp.ReturnUrl = testAppReturnUrl;
         }
         await context.SaveChangesAsync();
+
+        // TEMPORARY — registers the MVC client app so the Gateway accepts its returnUrl.
+        // Remove once the app is registered through the Admin UI.
+        const string mvcAppName = "MvcClientApp";                        // must match MVC appsettings: Sso:AppName
+        const string mvcCallbackUrl = "https://localhost:7180/callback"; // Sso:ClientBaseUrl + /callback
+
+        var mvcApp = await context.Tenants.FirstOrDefaultAsync(t => t.Name == mvcAppName);
+        if (mvcApp == null)
+        {
+            mvcApp = new TenantApp { Name = mvcAppName, ReturnUrl = mvcCallbackUrl, IsActive = true };
+            context.Tenants.Add(mvcApp);
+        }
+        else
+        {
+            mvcApp.ReturnUrl = mvcCallbackUrl;
+            mvcApp.IsActive = true;
+        }
+        await context.SaveChangesAsync();
+
+        // The token only carries groups of THIS app, and the MVC app rejects users with no group.
+        const string mvcGroupName = "MvcClientApp-Users"; // same [AppName]-[GroupName] format as the Admin UI
+        var mvcGroup = await context.Groups
+            .FirstOrDefaultAsync(g => g.TenantAppId == mvcApp.Id && g.Name == mvcGroupName);
+        if (mvcGroup == null)
+        {
+            mvcGroup = new Group { Name = mvcGroupName, Level = 1, TenantAppId = mvcApp.Id };
+            context.Groups.Add(mvcGroup);
+            await context.SaveChangesAsync();
+        }
+
+        if (!string.IsNullOrWhiteSpace(adminEmail))
+        {
+            var adminForMvc = await userManager.FindByEmailAsync(adminEmail);
+            if (adminForMvc != null &&
+                !await context.UserGroups.AnyAsync(ug => ug.UserId == adminForMvc.Id && ug.GroupId == mvcGroup.Id))
+            {
+                context.UserGroups.Add(new UserGroup { UserId = adminForMvc.Id, GroupId = mvcGroup.Id });
+                await context.SaveChangesAsync();
+            }
+        }
     }
 }
