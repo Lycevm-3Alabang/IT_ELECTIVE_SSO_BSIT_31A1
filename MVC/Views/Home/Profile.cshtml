@@ -1,0 +1,60 @@
+﻿@model MvcClientApp.Services.UserInfoResponse
+@{
+    ViewData["Title"] = "Profile";
+}
+
+<h4 class="page-heading">Your Profile</h4>
+<p class="page-sub">Details your SSO Gateway token gave this app.</p>
+
+<div class="two-col">
+    <div class="card">
+        <div class="card-title">Account Information</div>
+        <div class="info-row">
+            <span class="info-label">Email</span>
+            <span class="info-value">@Model.Email</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">User ID</span>
+            <span class="info-value">@Model.Sub</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">App</span>
+            <span class="info-value">@Model.TenantApp</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Session expires</span>
+            <span class="info-value">@Model.ExpiresAt?.ToLocalTime().ToString("MMM d, yyyy h:mm tt")</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">Groups &amp; Levels</div>
+
+        @if (Model.Groups.Length == 0)
+        {
+            <p class="muted">No groups assigned for this app yet.</p>
+        }
+        else
+        {
+            <div>
+                @foreach (var g in Model.Groups)
+                {
+                    <span class="pill">@g</span>
+                }
+            </div>
+        }
+
+        @if (Model.Levels.Count > 0)
+        {
+            <div style="margin-top: 12px;">
+                @foreach (var level in Model.Levels)
+                {
+                    <div class="info-row">
+                        <span class="info-label">@level.Key</span>
+                        <span class="info-value">Level @level.Value</span>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
