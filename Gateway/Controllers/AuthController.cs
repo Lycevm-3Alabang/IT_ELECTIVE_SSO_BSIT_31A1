@@ -105,6 +105,12 @@ public class AuthController : Controller
         await _userManager.UpdateAsync(user);
         await _auditService.LogLogin(user.Id, email, true, null, ip);
 
+        // Temporary password (new user or admin reset): must change it before going anywhere.
+        if (user.MustChangePassword)
+        {
+            return RedirectToAction(nameof(ChangePassword), new { returnUrl });
+        }
+
         // Came from a client app -> straight back to it with the JWT.
         // Came to the Gateway directly -> Portal decides (admin chooser / user's app).
         return app == null
@@ -169,6 +175,59 @@ public class AuthController : Controller
     {
         await _signInManager.SignOutAsync();
         return RedirectToAction(nameof(Login));
+    }
+
+    // ------------------------------------------------------- CHANGE PASSWORD
+
+    [HttpGet]
+    [Authorize]
+    public IActionResult ChangePassword(string? returnUrl)
+    {
+        ViewBag.ReturnUrl = returnUrl;
+        return View();
+    }
+
+    [HttpPost]
+    [Authorize]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ChangePassword(string currentPassword, string newPassword, string confirmPassword, string? returnUrl)
+    {
+        ViewBag.ReturnUrl = returnUrl;
+
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction(nameof(Login));
+        }
+
+        if (string.IsNullOrWhiteSpace(newPassword))
+            ModelState.AddModelError("", "New password is required.");
+        else if (newPassword != confirmPassword)
+            ModelState.AddModelError("", "New passwords do not match.");
+        else if (newPassword == currentPassword)
+            ModelState.AddModelError("", "New password must be different from the temporary password.");
+
+        if (!ModelState.IsValid) return View();
+
+        var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+        if (!result.Succeeded)
+        {
+            foreach (var e in result.Errors) ModelState.AddModelError("", e.Description);
+            return View();
+        }
+
+        user.MustChangePassword = false;
+        await _userManager.UpdateAsync(user);
+        await _signInManager.RefreshSignInAsync(user);   // password change rotates the security stamp
+        await _auditService.LogAction(user.Id, "PasswordChanged", $"{user.Email} changed their temporary password.");
+
+        if (!string.IsNullOrWhiteSpace(returnUrl))
+        {
+            var app = await _returnUrlValidator.ValidateAsync(returnUrl);
+            if (app != null) return await IssueTokenRedirectAsync(user, app);
+        }
+        return RedirectToAction(nameof(Portal));
     }
 
     // -------------------------------------------------------------- HELPERS

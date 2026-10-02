@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Gateway.Areas.Admin.Controllers;
 using Models.Entities;
@@ -19,8 +20,10 @@ public class UsersControllerDuplicateEmailTests
         userManagerMock.Setup(m => m.FindByEmailAsync("existing@example.com"))
             .ReturnsAsync(new ApplicationUser { Email = "existing@example.com" });
 
-        // Nulls are safe here because validation fails before the context or AuditService are touched
-        var controller = new UsersController(userManagerMock.Object, null!, null!);
+        var context = new SsoDbContext(new DbContextOptionsBuilder<SsoDbContext>()
+    .UseInMemoryDatabase(Guid.NewGuid().ToString())
+    .Options);
+        var controller = new UsersController(userManagerMock.Object, context, new AuditService(context));
 
         var result = await controller.Create("existing@example.com", "Password123!", "Password123!");
 

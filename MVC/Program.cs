@@ -1,70 +1,32 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using MvcClientApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Basahin ang "Sso" section ng appsettings.json
 var sso = builder.Configuration.GetSection("Sso").Get<SsoOptions>()
           ?? throw new InvalidOperationException("Missing 'Sso' section in appsettings.json.");
+
 if (string.IsNullOrWhiteSpace(sso.SecretKey))
     throw new InvalidOperationException("Sso:SecretKey must match the Gateway's JwtSettings:SecretKey.");
-builder.Services.AddSingleton(sso);
 
+builder.Services.AddSingleton(sso);
 builder.Services.AddControllersWithViews();
 
-// 2. JWT validation (galing sa cookie na ginawa ng /callback)
+// The JWT is validated once in AccountController.Callback.
+// After that, this cookie IS the session (it expires together with the JWT).
 builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
+    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
     {
-        options.MapInboundClaims = false;
-        options.TokenValidationParameters = sso.CreateValidationParameters();
-
-        options.Events = new JwtBearerEvents
-        {
-            OnMessageReceived = ctx =>
-            {
-                if (!ctx.Request.Headers.ContainsKey("Authorization") &&
-                    ctx.Request.Cookies.TryGetValue(SsoOptions.CookieName, out var cookieToken))
-                {
-                    ctx.Token = cookieToken;
-                }
-                return Task.CompletedTask;
-            },
-
-            // Hindi pwede ang token na para sa ibang tenant app,
-            // at kailangang may group ang user para sa app na ito
-            OnTokenValidated = ctx =>
-            {
-                if (!SsoTokenRules.IsIssuedForApp(ctx.Principal, sso.AppName))
-                    ctx.Fail("This token was issued for a different app.");
-                else if (!SsoTokenRules.HasAppAccess(ctx.Principal))
-                    ctx.Fail("This user is not assigned to this app.");
-                return Task.CompletedTask;
-            },
-
-            OnAuthenticationFailed = ctx =>
-            {
-                if (ctx.Exception is SecurityTokenExpiredException)
-                {
-                    ctx.HttpContext.Items[SsoOptions.ExpiredFlag] = true;
-                    ctx.Response.Cookies.Delete(SsoOptions.CookieName);
-                }
-                return Task.CompletedTask;
-            },
-
-            // Hindi naka-login sa protected page -> papunta sa SSO login
-            OnChallenge = ctx =>
-            {
-                ctx.HandleResponse();
-                var expired = ctx.HttpContext.Items.ContainsKey(SsoOptions.ExpiredFlag)
-                              || ctx.AuthenticateFailure is SecurityTokenExpiredException;
-                ctx.Response.Redirect(expired ? "/?error=expired" : "/login");
-                return Task.CompletedTask;
-            }
-        };
+        options.Cookie.Name = "mvc.session";          // distinct name: localhost cookies are shared across ports
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+        options.LoginPath = "/login";                 // -> redirects to the Gateway login
+        options.AccessDeniedPath = "/Home/AccessDenied";
+        options.SlidingExpiration = false;            // never outlive the JWT
     });
+
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
