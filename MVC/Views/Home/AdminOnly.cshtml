@@ -1,0 +1,10 @@
+﻿@{
+    ViewData["Title"] = "Admin Panel";
+}
+<h4 class="page-heading">Admin Panel</h4>
+<p class="page-sub">Only users with a level 0 group for this app can see this page.</p>
+
+<div class="card" style="max-width: 640px;">
+    <div class="card-title">Role check passed</div>
+    <p class="muted">You are signed in as <strong>@User.Identity?.Name</strong> with the <strong>Admin</strong> role in this app.</p>
+</div>

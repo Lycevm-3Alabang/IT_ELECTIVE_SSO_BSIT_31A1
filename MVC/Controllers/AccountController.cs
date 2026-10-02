@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using MvcClientApp.Services;
@@ -16,7 +18,10 @@ public class AccountController : Controller
     }
 
     [HttpGet("/login")]
-    public IActionResult Login() => Redirect(_sso.GatewayLoginUrl);
+    public IActionResult Login() =>
+        User.Identity?.IsAuthenticated == true
+            ? Redirect("/Home/Profile")
+            : Redirect(_sso.GatewayLoginUrl);
 
     [HttpGet("/callback")]
     public async Task<IActionResult> Callback(string? token)
@@ -32,31 +37,41 @@ public class AccountController : Controller
                 : "/?error=invalid_token");
         }
 
-        var principal = new ClaimsPrincipal(result.ClaimsIdentity);
+        var validated = new ClaimsPrincipal(result.ClaimsIdentity);
 
-        if (!SsoTokenRules.IsIssuedForApp(principal, _sso.AppName))
+        if (!SsoTokenRules.IsIssuedForApp(validated, _sso.AppName))
             return Redirect("/?error=wrong_app");
 
-        // Bagong check: kailangang nasa group ng app na ito ang user
-        if (!SsoTokenRules.HasAppAccess(principal))
+        if (!SsoTokenRules.HasAppAccess(validated))
             return Redirect("/?error=no_access");
 
         var jwt = (JsonWebToken)result.SecurityToken;
-        Response.Cookies.Append(SsoOptions.CookieName, token, new CookieOptions
+        var expiresAt = new DateTimeOffset(DateTime.SpecifyKind(jwt.ValidTo, DateTimeKind.Utc));
+
+        var identity = SsoTokenRules.BuildSessionIdentity(result.ClaimsIdentity, expiresAt);
+
+        var props = new AuthenticationProperties
         {
-            HttpOnly = true,
-            Secure = Request.IsHttps,
-            SameSite = SameSiteMode.Lax,
-            Expires = new DateTimeOffset(jwt.ValidTo, TimeSpan.Zero)
-        });
+            IsPersistent = false,
+            AllowRefresh = false,
+            ExpiresUtc = expiresAt            // cookie session ends exactly when the JWT ends
+        };
+        // Keep the original JWT with the session, in case this app later needs to forward it to an API.
+        props.StoreTokens(new[] { new AuthenticationToken { Name = "access_token", Value = token } });
+
+        Response.Cookies.Delete(SsoOptions.CookieName);   // clean up the old raw-JWT cookie from the previous version
+        await HttpContext.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity), props);
 
         return Redirect("/Home/Profile");
     }
 
+    // Single logout: clear MVC's session, then let the Gateway clear its own.
     [HttpGet("/logout")]
-    public IActionResult Logout()
+    public async Task<IActionResult> Logout()
     {
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         Response.Cookies.Delete(SsoOptions.CookieName);
-        return Redirect("/");
+        return Redirect(_sso.GatewayLogoutUrl);
     }
 }

@@ -26,4 +26,17 @@ public class TemporaryPasswordGeneratorTests
         var second = TemporaryPasswordGenerator.Generate();
         Assert.NotEqual(first, second);
     }
+
+    [Fact]
+    public void Generate_AlwaysMeetsIdentityPasswordRules()
+    {
+        for (int i = 0; i < 500; i++)
+        {
+            var p = TemporaryPasswordGenerator.Generate();
+            Assert.Contains(p, char.IsUpper);
+            Assert.Contains(p, char.IsLower);
+            Assert.Contains(p, char.IsDigit);
+            Assert.Contains(p, c => !char.IsLetterOrDigit(c));
+        }
+    }
 }
