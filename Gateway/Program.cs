@@ -9,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<AuditService>();
 builder.Services.AddScoped<ReturnUrlValidator>();
 builder.Services.AddScoped<JwtTokenService>();
+
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<SsoDbContext>(options =>
@@ -54,9 +55,40 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
+
 app.UseCors("ClientApps");
+
 app.UseAuthentication();
+
+// Gate: a signed-in user who still has a temporary password can only reach the
+// change-password page (and sign-out). Everything else bounces back there.
+app.Use(async (context, next) =>
+{
+    if (context.User.Identity?.IsAuthenticated == true)
+    {
+        var path = context.Request.Path;
+        var allowed =
+            path.StartsWithSegments("/Auth/ChangePassword", StringComparison.OrdinalIgnoreCase) ||
+            path.StartsWithSegments("/Account/Logout", StringComparison.OrdinalIgnoreCase) ||
+            path.StartsWithSegments("/Auth/Logout", StringComparison.OrdinalIgnoreCase) ||
+            Path.HasExtension(path);   // css / js / lib / favicon
+
+        if (!allowed)
+        {
+            var userManager = context.RequestServices.GetRequiredService<UserManager<ApplicationUser>>();
+            var current = await userManager.GetUserAsync(context.User);
+            if (current?.MustChangePassword == true)
+            {
+                context.Response.Redirect("/Auth/ChangePassword");
+                return;
+            }
+        }
+    }
+    await next();
+});
+
 app.UseAuthorization();
+
 app.MapStaticAssets();
 
 // Area route must come BEFORE the default route.

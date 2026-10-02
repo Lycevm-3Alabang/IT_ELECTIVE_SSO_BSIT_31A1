@@ -28,6 +28,7 @@ public static class SeedData
         if (!string.IsNullOrWhiteSpace(adminEmail) && !string.IsNullOrWhiteSpace(adminPassword))
         {
             var existingAdmin = await userManager.FindByEmailAsync(adminEmail);
+
             if (existingAdmin == null)
             {
                 var adminUser = new ApplicationUser
@@ -37,6 +38,7 @@ public static class SeedData
                     EmailConfirmed = true,
                     IsActive = true
                 };
+
                 var result = await userManager.CreateAsync(adminUser, adminPassword);
                 if (result.Succeeded)
                 {
@@ -49,11 +51,8 @@ public static class SeedData
             }
         }
 
-        // TEMPORARY — for JWT/login demo purposes only.
-        // Remove once Issue 8's admin UI (Tenant App registration) is built,
-        // so apps get registered through the actual admin screen instead.
+        // TEMPORARY - demo app. Remove once apps are registered through the Admin UI.
         const string testAppReturnUrl = "https://localhost:7281/Home/Privacy";
-
         var testApp = await context.Tenants.FirstOrDefaultAsync(t => t.Name == "TestApp");
         if (testApp == null)
         {
@@ -70,8 +69,7 @@ public static class SeedData
         }
         await context.SaveChangesAsync();
 
-        // TEMPORARY — registers the MVC client app so the Gateway accepts its returnUrl.
-        // Remove once the app is registered through the Admin UI.
+        // TEMPORARY - registers the MVC client app so the Gateway accepts its returnUrl.
         const string mvcAppName = "MvcClientApp";                        // must match MVC appsettings: Sso:AppName
         const string mvcCallbackUrl = "https://localhost:7180/callback"; // Sso:ClientBaseUrl + /callback
 
@@ -88,26 +86,40 @@ public static class SeedData
         }
         await context.SaveChangesAsync();
 
-        // The token only carries groups of THIS app, and the MVC app rejects users with no group.
-        const string mvcGroupName = "MvcClientApp-Users"; // same [AppName]-[GroupName] format as the Admin UI
-        var mvcGroup = await context.Groups
-            .FirstOrDefaultAsync(g => g.TenantAppId == mvcApp.Id && g.Name == mvcGroupName);
-        if (mvcGroup == null)
-        {
-            mvcGroup = new Group { Name = mvcGroupName, Level = 1, TenantAppId = mvcApp.Id };
-            context.Groups.Add(mvcGroup);
-            await context.SaveChangesAsync();
-        }
+        // Level 0 = highest power -> "Admin" role inside MVC. Any other level -> "User".
+        var mvcUsersGroup = await EnsureGroupAsync(context, mvcApp.Id, "MvcClientApp-Users", 1);
+        var mvcAdminGroup = await EnsureGroupAsync(context, mvcApp.Id, "MvcClientApp-Admin", 0);
 
         if (!string.IsNullOrWhiteSpace(adminEmail))
         {
             var adminForMvc = await userManager.FindByEmailAsync(adminEmail);
-            if (adminForMvc != null &&
-                !await context.UserGroups.AnyAsync(ug => ug.UserId == adminForMvc.Id && ug.GroupId == mvcGroup.Id))
+            if (adminForMvc != null)
             {
-                context.UserGroups.Add(new UserGroup { UserId = adminForMvc.Id, GroupId = mvcGroup.Id });
+                foreach (var group in new[] { mvcUsersGroup, mvcAdminGroup })
+                {
+                    var assigned = await context.UserGroups
+                        .AnyAsync(ug => ug.UserId == adminForMvc.Id && ug.GroupId == group.Id);
+                    if (!assigned)
+                    {
+                        context.UserGroups.Add(new UserGroup { UserId = adminForMvc.Id, GroupId = group.Id });
+                    }
+                }
                 await context.SaveChangesAsync();
             }
         }
+    }
+
+    private static async Task<Group> EnsureGroupAsync(SsoDbContext context, int tenantAppId, string name, int level)
+    {
+        var group = await context.Groups
+            .FirstOrDefaultAsync(g => g.TenantAppId == tenantAppId && g.Name == name);
+
+        if (group == null)
+        {
+            group = new Group { Name = name, Level = level, TenantAppId = tenantAppId };
+            context.Groups.Add(group);
+            await context.SaveChangesAsync();
+        }
+        return group;
     }
 }

@@ -21,4 +21,5 @@ public class AvailableGroupInfo
     public int GroupId { get; set; }
     public string AppName { get; set; } = string.Empty;
     public string GroupName { get; set; } = string.Empty;
+    public int? Level { get; set; }
 }

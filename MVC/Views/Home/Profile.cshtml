@@ -22,6 +22,10 @@
             <span class="info-value">@Model.TenantApp</span>
         </div>
         <div class="info-row">
+            <span class="info-label">Role in this app</span>
+            <span class="info-value">@(User.IsInRole("Admin") ? "Admin" : "User")</span>
+        </div>
+        <div class="info-row">
             <span class="info-label">Session expires</span>
             <span class="info-value">@Model.ExpiresAt?.ToLocalTime().ToString("MMM d, yyyy h:mm tt")</span>
         </div>

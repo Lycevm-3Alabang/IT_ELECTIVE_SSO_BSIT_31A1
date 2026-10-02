@@ -7,6 +7,7 @@ public class UserDetailsViewModel
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? LastLoginAt { get; set; }
+    public bool IsAdmin { get; set; }
     public List<UserGroupInfo> Groups { get; set; } = new();
 }
 

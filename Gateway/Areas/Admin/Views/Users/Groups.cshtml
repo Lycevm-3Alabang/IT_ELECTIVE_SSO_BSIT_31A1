@@ -1,0 +1,77 @@
+﻿@model Gateway.Areas.Admin.Models.UserGroupsViewModel
+@{
+    ViewData["Title"] = "User Groups";
+}
+
+<h2>Groups for @Model.Email</h2>
+@Html.AntiForgeryToken()
+
+<h5 class="mt-4">Assigned groups</h5>
+@if (!Model.AssignedGroups.Any())
+{
+    <p class="text-muted">This user is not in any group yet, so they cannot open any client app.</p>
+}
+else
+{
+    <table class="table table-sm">
+        <thead>
+            <tr><th>App</th><th>Group</th><th>Power Level</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var g in Model.AssignedGroups)
+            {
+                <tr>
+                    <td>@g.AppName</td>
+                    <td>@g.GroupName</td>
+                    <td>@g.Level</td>
+                    <td>
+                        <button type="button" class="btn btn-link text-danger p-0 unassign-btn"
+                                data-group-id="@g.GroupId">
+                            Remove
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<h5 class="mt-4">Add to a group</h5>
+@if (!Model.AvailableGroups.Any())
+{
+    <p class="text-muted">No more groups available. Create groups under the Groups menu first.</p>
+}
+else
+{
+    <form method="post" action="/Admin/Users/@Model.UserId/Groups" class="d-flex gap-2" style="max-width:520px;">
+        @Html.AntiForgeryToken()
+        <select name="groupId" class="form-select" required>
+            @foreach (var g in Model.AvailableGroups)
+            {
+                <option value="@g.GroupId">@g.AppName - @g.GroupName</option>
+            }
+        </select>
+        <button type="submit" class="btn btn-primary">Assign</button>
+    </form>
+}
+
+<p class="mt-4"><a asp-action="Details" asp-route-id="@Model.UserId">Back to user details</a></p>
+
+@section Scripts {
+    <script>
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+        document.querySelectorAll('.unassign-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                if (!confirm('Remove this user from the group?')) return;
+                const headers = { 'X-Requested-With': 'XMLHttpRequest' };
+                if (token) headers['RequestVerificationToken'] = token;
+                fetch(`/Admin/Users/@Model.UserId/Groups/${btn.dataset.groupId}`, { method: 'DELETE', headers })
+                    .then(function (res) {
+                        if (!res.ok) throw new Error('Request failed: ' + res.status);
+                        location.reload();
+                    })
+                    .catch(function () { alert('Could not remove the group.'); });
+            });
+        });
+    </script>
+}
