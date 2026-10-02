@@ -1,0 +1,71 @@
+﻿@{
+    var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    bool IsActive(string name) => string.Equals(action, name, StringComparison.OrdinalIgnoreCase);
+
+    var isAuth = User.Identity?.IsAuthenticated == true;
+    var me = isAuth ? UserInfoMapper.FromPrincipal(User) : null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] - IT ELECTIVE MVC Client App</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="shell">
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-logo"></div>
+                <div>
+                    <div class="brand-title">IT ELECTIVE</div>
+                    <div class="brand-subtitle">MVC Client App</div>
+                </div>
+            </div>
+
+            <nav class="nav">
+                <a class="nav-link @(IsActive("Index") ? "active" : "")" href="/">
+                    <i class="bi bi-grid-1x2-fill"></i> <span>Dashboard</span>
+                </a>
+                <a class="nav-link @(IsActive("Profile") ? "active" : "")" href="/Home/Profile">
+                    <i class="bi bi-person-fill"></i> <span>Profile</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                @if (isAuth)
+                {
+                    <a class="nav-link logout" href="/logout">
+                        <i class="bi bi-box-arrow-right"></i> <span>Logout</span>
+                    </a>
+                }
+                else
+                {
+                    <a class="nav-link" href="/login">
+                        <i class="bi bi-box-arrow-in-right"></i> <span>Login with SSO</span>
+                    </a>
+                }
+            </div>
+        </aside>
+
+        <div class="main">
+            <header class="topbar">
+                <h1 class="topbar-title">@(ViewData["Title"] ?? "MVC Client App")</h1>
+                <div class="topbar-user">
+                    <i class="bi bi-person-circle topbar-avatar"></i>
+                    <div>
+                        <div class="topbar-user-name">@(me?.Email ?? "Guest")</div>
+                        <div class="topbar-user-role">@(me?.TenantApp ?? "Not signed in")</div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="content">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+</body>
+</html>
