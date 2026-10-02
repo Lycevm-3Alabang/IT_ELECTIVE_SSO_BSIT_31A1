@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -30,14 +31,16 @@ public class SeedDataTests
             .Build();
 
     private static IServiceProvider BuildServices(
-        UserManager<ApplicationUser> userManager,
-        RoleManager<IdentityRole> roleManager,
-        IConfiguration config)
+    UserManager<ApplicationUser> userManager,
+    RoleManager<IdentityRole> roleManager,
+    IConfiguration config)
     {
         var services = new ServiceCollection();
         services.AddSingleton(userManager);
         services.AddSingleton(roleManager);
         services.AddSingleton(config);
+        services.AddDbContext<SsoDbContext>(o =>
+            o.UseInMemoryDatabase(Guid.NewGuid().ToString()));
         return services.BuildServiceProvider();
     }
 
