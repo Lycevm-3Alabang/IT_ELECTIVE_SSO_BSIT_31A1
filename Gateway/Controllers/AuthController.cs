@@ -102,7 +102,12 @@ public class AuthController : Controller
         await _signInManager.SignInAsync(user, isPersistent: false);
 
         user.LastLoginAt = DateTime.Now;
-        await _userManager.UpdateAsync(user);
+        var update = await _userManager.UpdateAsync(user);
+        if (!update.Succeeded)
+        {
+            // LastLoginAt is cosmetic: if it could not be saved, forget the change instead of failing the login.
+            _context.Entry(user).State = EntityState.Detached;
+        }
         await _auditService.LogLogin(user.Id, email, true, null, ip);
 
         // Temporary password (new user or admin reset): must change it before going anywhere.

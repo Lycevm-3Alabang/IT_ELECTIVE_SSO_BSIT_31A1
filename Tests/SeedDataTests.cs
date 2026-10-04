@@ -31,9 +31,9 @@ public class SeedDataTests
             .Build();
 
     private static IServiceProvider BuildServices(
-    UserManager<ApplicationUser> userManager,
-    RoleManager<IdentityRole> roleManager,
-    IConfiguration config)
+        UserManager<ApplicationUser> userManager,
+        RoleManager<IdentityRole> roleManager,
+        IConfiguration config)
     {
         var services = new ServiceCollection();
         services.AddSingleton(userManager);
@@ -43,6 +43,23 @@ public class SeedDataTests
             o.UseInMemoryDatabase(Guid.NewGuid().ToString()));
         return services.BuildServiceProvider();
     }
+
+    private static ServiceProvider BuildServicesWithDb(
+        UserManager<ApplicationUser> userManager,
+        RoleManager<IdentityRole> roleManager,
+        IConfiguration config,
+        string dbName)
+    {
+        var services = new ServiceCollection();
+        services.AddSingleton(userManager);
+        services.AddSingleton(roleManager);
+        services.AddSingleton(config);
+        services.AddDbContext<SsoDbContext>(o => o.UseInMemoryDatabase(dbName));
+        return services.BuildServiceProvider();
+    }
+
+    private static SsoDbContext OpenDb(string dbName) =>
+        new(new DbContextOptionsBuilder<SsoDbContext>().UseInMemoryDatabase(dbName).Options);
 
     [Fact]
     public async Task InitializeAsync_CreatesAdmin_WhenMissing()
@@ -77,5 +94,58 @@ public class SeedDataTests
         await SeedData.InitializeAsync(services);
 
         userManagerMock.Verify(m => m.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task InitializeAsync_FirstRun_CreatesMvcClientAppGroupsAndAssignsAdmin()
+    {
+        var dbName = Guid.NewGuid().ToString();
+        var admin = new ApplicationUser { Id = "admin-1", Email = "admin@example.com" };
+        var userManagerMock = MockUserManager();
+        userManagerMock.Setup(m => m.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(admin);
+        userManagerMock.Setup(m => m.IsInRoleAsync(admin, SeedData.AdminRole)).ReturnsAsync(true);
+
+        await SeedData.InitializeAsync(
+            BuildServicesWithDb(userManagerMock.Object, MockRoleManager().Object, BuildConfig(), dbName));
+
+        using var db = OpenDb(dbName);
+        var app = await db.Tenants.SingleAsync(t => t.Name == "MvcClientApp");
+        Assert.True(app.IsActive);
+
+        var groups = await db.Groups.Where(g => g.TenantAppId == app.Id).ToListAsync();
+        Assert.Contains(groups, g => g.Name == "MvcClientApp-Admin" && g.Level == 0);
+        Assert.Contains(groups, g => g.Name == "MvcClientApp-Users" && g.Level == 1);
+        Assert.Equal(2, await db.UserGroups.CountAsync(ug => ug.UserId == "admin-1"));
+    }
+
+    [Fact]
+    public async Task InitializeAsync_DoesNotReactivateOrOverwrite_ExistingMvcClientApp()
+    {
+        var dbName = Guid.NewGuid().ToString();
+        using (var setup = OpenDb(dbName))
+        {
+            setup.Tenants.Add(new TenantApp
+            {
+                Name = "MvcClientApp",
+                ReturnUrl = "https://custom.example.com/callback",
+                IsActive = false      // an admin disabled it in the UI
+            });
+            setup.SaveChanges();
+        }
+
+        var admin = new ApplicationUser { Id = "admin-1", Email = "admin@example.com" };
+        var userManagerMock = MockUserManager();
+        userManagerMock.Setup(m => m.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(admin);
+        userManagerMock.Setup(m => m.IsInRoleAsync(admin, SeedData.AdminRole)).ReturnsAsync(true);
+
+        await SeedData.InitializeAsync(
+            BuildServicesWithDb(userManagerMock.Object, MockRoleManager().Object, BuildConfig(), dbName));
+
+        using var db = OpenDb(dbName);
+        var app = await db.Tenants.SingleAsync(t => t.Name == "MvcClientApp");
+        Assert.False(app.IsActive);
+        Assert.Equal("https://custom.example.com/callback", app.ReturnUrl);
+        Assert.Empty(db.Groups);          // deleted/never-created groups are not resurrected
+        Assert.Empty(db.UserGroups);
     }
 }

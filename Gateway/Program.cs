@@ -6,11 +6,26 @@ using Models.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var jwtKey = builder.Configuration["JwtSettings:SecretKey"];
+if (string.IsNullOrWhiteSpace(jwtKey) || jwtKey.Length < 32)
+{
+    throw new InvalidOperationException(
+        "JwtSettings:SecretKey is missing or shorter than 32 characters. " +
+        "Set it with: dotnet user-secrets set \"JwtSettings:SecretKey\" \"<long random value>\" (see README).");
+}
+
 builder.Services.AddScoped<AuditService>();
 builder.Services.AddScoped<ReturnUrlValidator>();
 builder.Services.AddScoped<JwtTokenService>();
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    // Every POST/PUT/DELETE in the Gateway (Users, Groups, TenantApps, Auth, Account)
+    // must carry a valid antiforgery token. GET requests are not affected.
+    options.Filters.Add(new Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute());
+});
+
+builder.Services.AddAntiforgery(options => options.Cookie.Name = "SSO.Gateway.Antiforgery");
 
 builder.Services.AddDbContext<SsoDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));

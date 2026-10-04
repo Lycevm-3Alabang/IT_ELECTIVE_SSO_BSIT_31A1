@@ -66,10 +66,14 @@ public class AccountController : Controller
         return Redirect("/Home/Profile");
     }
 
-    // Single logout: clear MVC's session, then let the Gateway clear its own.
-    [HttpGet("/logout")]
+        // Single logout: clear MVC's session, then let the Gateway clear its own.
+    // POST only, and only from this app's own pages (see RequestOriginGuard).
+    [HttpPost("/logout")]
     public async Task<IActionResult> Logout()
     {
+        if (!RequestOriginGuard.IsSameOrigin(Request))
+            return BadRequest("Cross-site logout request blocked.");
+
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         Response.Cookies.Delete(SsoOptions.CookieName);
         return Redirect(_sso.GatewayLogoutUrl);
