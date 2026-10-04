@@ -1,38 +1,82 @@
-﻿@{
+﻿@using Gateway.Areas.Admin.Models
+@{
     ViewData["Title"] = "Create User";
+    var groups = ViewBag.AvailableGroups as List<AvailableGroupInfo> ?? new List<AvailableGroupInfo>();
+    var selected = ViewBag.SelectedGroupIds as int[] ?? Array.Empty<int>();
+    bool isAdmin = ViewBag.IsAdmin == true;
+    bool mustChange = ViewBag.MustChangePassword is bool b ? b : true;
 }
 
 <h2>Create User</h2>
 
-<form method="post" action="/Admin/Users/Create">
+<form method="post" action="/Admin/Users/Create" style="max-width:560px;">
     @Html.AntiForgeryToken()
-    <div>
-        <label>Email:</label>
-        <input type="email" name="email" value="@ViewBag.Email" required />
+
+    <div class="mb-3">
+        <label class="form-label" for="email">Email</label>
+        <input id="email" type="email" name="email" value="@ViewBag.Email" class="form-control" required />
         @if (ViewData.ModelState["Email"]?.Errors.Count > 0)
         {
-            <span style="color:red;">@ViewData.ModelState["Email"]!.Errors.First().ErrorMessage</span>
+            <div class="text-danger small">@ViewData.ModelState["Email"]!.Errors.First().ErrorMessage</div>
         }
     </div>
-    <div>
-        <label>Temporary Password:</label>
-        <input type="password" name="password" required />
+
+    <div class="mb-3">
+        <label class="form-label" for="password">Temporary Password</label>
+        <input id="password" type="password" name="password" class="form-control" required />
         @if (ViewData.ModelState["Password"]?.Errors.Count > 0)
         {
-            <span style="color:red;">@ViewData.ModelState["Password"]!.Errors.First().ErrorMessage</span>
+            <div class="text-danger small">@ViewData.ModelState["Password"]!.Errors.First().ErrorMessage</div>
         }
     </div>
-    <div>
-        <label>Confirm Password:</label>
-        <input type="password" name="confirmPassword" required />
+
+    <div class="mb-3">
+        <label class="form-label" for="confirmPassword">Confirm Password</label>
+        <input id="confirmPassword" type="password" name="confirmPassword" class="form-control" required />
         @if (ViewData.ModelState["ConfirmPassword"]?.Errors.Count > 0)
         {
-            <span style="color:red;">@ViewData.ModelState["ConfirmPassword"]!.Errors.First().ErrorMessage</span>
+            <div class="text-danger small">@ViewData.ModelState["ConfirmPassword"]!.Errors.First().ErrorMessage</div>
         }
     </div>
-    <button type="submit">Save User</button>
-</form>
 
-<div style="color: red;">
-    @Html.ValidationSummary()
-</div>
+    <div class="form-check mb-2">
+        <input class="form-check-input" type="checkbox" id="mustChangePassword" name="mustChangePassword" value="true" @(mustChange ? "checked" : "") />
+        <input type="hidden" name="mustChangePassword" value="false" />
+        <label class="form-check-label" for="mustChangePassword">Require password change at first login</label>
+    </div>
+
+    <div class="form-check mb-4">
+        <input class="form-check-input" type="checkbox" id="isAdmin" name="isAdmin" value="true" @(isAdmin ? "checked" : "") />
+        <input type="hidden" name="isAdmin" value="false" />
+        <label class="form-check-label" for="isAdmin">
+            Gateway admin <span class="text-muted">(can open this admin site)</span>
+        </label>
+    </div>
+
+    <h5>Apps &amp; groups</h5>
+    <p class="text-muted small">
+        A user needs at least one group to open an app. A level 0 group gives the Admin role inside that app.
+    </p>
+    @if (!groups.Any())
+    {
+        <p class="text-muted">No groups exist yet. You can assign them later from the user's Details page.</p>
+    }
+    else
+    {
+        foreach (var g in groups)
+        {
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="groupIds" value="@g.GroupId"
+                       id="group-@g.GroupId" @(selected.Contains(g.GroupId) ? "checked" : "") />
+                <label class="form-check-label" for="group-@g.GroupId">
+                    @g.AppName &mdash; @g.GroupName <span class="text-muted">(level @g.Level)</span>
+                </label>
+            </div>
+        }
+    }
+
+    <div class="text-danger mt-3">@Html.ValidationSummary()</div>
+
+    <button type="submit" class="btn btn-primary mt-2">Save User</button>
+    <a asp-action="Index" class="btn btn-outline-secondary mt-2 ms-2">Cancel</a>
+</form>

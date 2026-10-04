@@ -2,5 +2,7 @@
   <Project Path="Data/Data.csproj" />
   <Project Path="Gateway/Gateway.csproj" />
   <Project Path="Models/Models.csproj" />
+  <Project Path="MVC/MVC.csproj" Id="f0d115dc-7404-40e0-9d41-457ee0e78def" />
+  <Project Path="SsoClientApi/SsoClientApi.csproj" />
   <Project Path="Tests/Tests.csproj" />
 </Solution>

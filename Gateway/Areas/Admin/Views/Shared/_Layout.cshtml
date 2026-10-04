@@ -1,0 +1,100 @@
+﻿@{
+    var currentController = ViewContext.RouteData.Values["Controller"]?.ToString() ?? "";
+
+    bool IsActive(string controllerName) =>
+        string.Equals(currentController, controllerName, StringComparison.OrdinalIgnoreCase);
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - IT ELECTIVE SSO Gateway</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+</head>
+<body class="admin-body">
+
+    <button id="sidebarToggle" class="admin-sidebar-toggle d-lg-none" type="button" aria-label="Toggle navigation">
+        <i class="bi bi-list"></i>
+    </button>
+    <div id="sidebarOverlay" class="admin-sidebar-overlay"></div>
+
+    <div class="admin-shell">
+        <!-- NAVIGATION SIDEBAR START -->
+        <aside class="admin-sidebar" id="adminSidebar">
+            <div class="admin-brand">
+                <div class="admin-brand-logo"></div>
+                <div>
+                    <div class="admin-brand-title">IT ELECTIVE</div>
+                    <div class="admin-brand-subtitle">SSO Gateway</div>
+                </div>
+            </div>
+
+            <nav class="admin-nav">
+                <!-- 1. Dashboard -->
+                <a class="admin-nav-link @(IsActive("Dashboard") ? "active" : "")"
+                   asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                    <i class="bi bi-grid-1x2-fill"></i> <span>Dashboard</span>
+                </a>
+
+                <!-- 2. Users -->
+                <a class="admin-nav-link @(IsActive("Users") ? "active" : "")"
+                   asp-area="Admin" asp-controller="Users" asp-action="Index">
+                    <i class="bi bi-person-fill"></i> <span>Users</span>
+                </a>
+
+                <!-- 3. Groups -->
+                <a class="admin-nav-link @(IsActive("Groups") ? "active" : "")"
+                   asp-area="Admin" asp-controller="Groups" asp-action="Index">
+                    <i class="bi bi-people-fill"></i> <span>Groups</span>
+                </a>
+
+                <!-- 4. Apps (Applications) -->
+                <a class="admin-nav-link @(IsActive("TenantApps") ? "active" : "")"
+                   asp-area="Admin" asp-controller="TenantApps" asp-action="Index">
+                    <i class="bi bi-phone-fill"></i> <span>Apps</span>
+                </a>
+
+                <!-- 5. Audit Logs -->
+                <a class="admin-nav-link @(IsActive("AuditLogs") ? "active" : "")"
+                   asp-area="Admin" asp-controller="AuditLogs" asp-action="Index">
+                    <i class="bi bi-file-earmark-text-fill"></i> <span>Audit Logs</span>
+                </a>
+            </nav>
+
+            <form class="admin-logout" method="post" asp-controller="Account" asp-action="Logout" asp-area="">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="admin-nav-link admin-logout-btn">
+                    <i class="bi bi-box-arrow-right"></i> <span>Logout</span>
+                </button>
+            </form>
+        </aside>
+        <!-- NAVIGATION SIDEBAR END -->
+
+        <div class="admin-main">
+            <header class="admin-topbar">
+                <h1 class="admin-topbar-title">@(ViewData["Title"] ?? currentController)</h1>
+                <div class="admin-topbar-user">
+                    <i class="bi bi-person-circle admin-topbar-avatar"></i>
+                    <div class="admin-topbar-user-info">
+                        <div class="admin-topbar-user-name">@(User.Identity != null && User.Identity.IsAuthenticated ? User.Identity.Name : "Admin User")</div>
+                        <div class="admin-topbar-user-role">Super Administrator</div>
+                    </div>
+                    <i class="bi bi-chevron-down admin-topbar-chevron"></i>
+                </div>
+            </header>
+
+            <main class="admin-content">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/admin.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Gateway.Areas.Admin.Controllers;
-using Data;
 using Models.Entities;
 using Moq;
 using Xunit;
@@ -28,7 +27,9 @@ public class ToggleActiveFlowTests
         userManagerMock.Setup(m => m.FindByIdAsync("u1")).ReturnsAsync(user);
         userManagerMock.Setup(m => m.UpdateAsync(It.IsAny<ApplicationUser>())).ReturnsAsync(IdentityResult.Success);
 
-        var controller = new UsersController(userManagerMock.Object, NewInMemoryContext())
+        var context = NewInMemoryContext();
+        var auditService = new AuditService(context);
+        var controller = new UsersController(userManagerMock.Object, context, auditService)
         {
             ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }
         };

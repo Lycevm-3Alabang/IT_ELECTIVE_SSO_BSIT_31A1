@@ -5,6 +5,25 @@
 
 <h2>User Details</h2>
 
+@if (TempData["TemporaryPassword"] != null)
+{
+    <div class="alert alert-success d-flex align-items-center gap-2">
+        <i class="bi bi-check-circle-fill"></i>
+        <span>Password reset successfully. Share the temporary password below with the user.</span>
+    </div>
+
+    <div class="alert alert-warning">
+        <label for="tempPasswordField" class="form-label mb-1">Temporary password</label>
+        <div class="input-group" style="max-width: 400px;">
+            <input id="tempPasswordField" type="text" class="form-control" value="@TempData["TemporaryPassword"]" readonly />
+            <button id="copyTempPasswordBtn" type="button" class="btn btn-outline-secondary" data-clipboard-target="#tempPasswordField">
+                <i class="bi bi-clipboard"></i> Copy to Clipboard
+            </button>
+        </div>
+        <small class="text-muted d-block mt-1">This password is shown once. The user will be required to change it on next login.</small>
+    </div>
+}
+
 <dl>
     <dt>Email</dt>
     <dd>@Model.Email</dd>
@@ -17,6 +36,28 @@
 
     <dt>Last Login</dt>
     <dd>@(Model.LastLoginAt.HasValue ? Model.LastLoginAt.Value.ToString("g") : "Never logged in")</dd>
+</dl>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+<dl>
+    <dt>Gateway admin</dt>
+    <dd>
+        @(Model.IsAdmin ? "Yes" : "No")
+        <form asp-action="SetAdmin" asp-route-id="@Model.Id" method="post" class="d-inline ms-2">
+            <input type="hidden" name="makeAdmin" value="@((!Model.IsAdmin).ToString().ToLower())" />
+            <button type="submit" class="btn btn-sm btn-outline-secondary">
+                @(Model.IsAdmin ? "Revoke admin" : "Make admin")
+            </button>
+        </form>
+    </dd>
 </dl>
 
 <h4>Group Memberships</h4>
@@ -47,4 +88,59 @@ else
     </table>
 }
 
+<a class="btn btn-primary me-2" asp-action="Groups" asp-route-userId="@Model.Id">
+    <i class="bi bi-people-fill"></i> Manage Groups
+</a>
+<button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#resetPasswordModal">
+    <i class="bi bi-key-fill"></i> Reset Password
+</button>
 <a asp-action="Index">Back to Users</a>
+
+<!-- Reset Password Modal -->
+<div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="resetPasswordModalLabel">Confirm Password Reset</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to reset the password for this user?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form asp-action="ResetPassword" asp-route-id="@Model.Id" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-warning">Reset Password</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const copyBtn = document.getElementById('copyTempPasswordBtn');
+        if (copyBtn) {
+            copyBtn.addEventListener('click', function() {
+                const field = document.querySelector(this.dataset.clipboardTarget);
+                if (!field) return;
+
+                navigator.clipboard.writeText(field.value).then(() => {
+                    const originalHtml = copyBtn.innerHTML;
+                    copyBtn.innerHTML = '<i class="bi bi-check2"></i> Copied!';
+                    copyBtn.classList.add('btn-success');
+                    copyBtn.classList.remove('btn-outline-secondary');
+
+                    setTimeout(() => {
+                        copyBtn.innerHTML = originalHtml;
+                        copyBtn.classList.remove('btn-success');
+                        copyBtn.classList.add('btn-outline-secondary');
+                    }, 1500);
+                }).catch(() => {
+                    field.select();
+                    document.execCommand('copy');
+                });
+            });
+        }
+    </script>
+}

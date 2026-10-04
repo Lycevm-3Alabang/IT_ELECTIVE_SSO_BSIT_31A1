@@ -1,0 +1,60 @@
+﻿@model Gateway.Models.PortalViewModel
+@{
+    ViewData["Title"] = "Choose destination";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] | IT ELECTIVE - SSO</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
+    <style>
+            .portal-option { display:block; padding:14px 16px; margin-bottom:12px; border:1px solid #d0d7de;
+                             border-radius:8px; text-decoration:none; color:inherit; }
+            .portal-option:hover { border-color:#4f46e5; background:#f5f6ff; }
+            .portal-option strong { display:block; }
+            .portal-option span { font-size:.85rem; color:#6b7280; }
+    </style>
+</head>
+<body>
+    <div class="auth-page">
+        <main class="auth-panel">
+            <div class="auth-card">
+                <h2>Where to?</h2>
+                <div class="auth-subtitle">Signed in as <strong>@Model.Email</strong></div>
+
+                @if (Model.IsAdmin)
+                {
+                    <a class="portal-option" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                        <strong>SSO Gateway Admin</strong>
+                        <span>Manage users, apps, groups and audit logs</span>
+                    </a>
+                }
+
+                @foreach (var app in Model.Apps)
+                {
+                    <a class="portal-option" asp-area="" asp-controller="Auth" asp-action="Launch" asp-route-id="@app.Id">
+                        <strong>@app.Name</strong>
+                        <span>@string.Join(", ", app.Groups)</span>
+                    </a>
+                }
+
+                @if (!Model.IsAdmin && !Model.Apps.Any())
+                {
+                    <div class="auth-alert" role="alert">
+                        <strong class="auth-alert-title">No apps assigned</strong>
+                        <p class="mb-0">Your account is not in any app group yet. Please contact your SSO administrator.</p>
+                    </div>
+                }
+
+                <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="mt-3">
+                    <button type="submit" class="btn btn-link p-0">Sign out</button>
+                </form>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

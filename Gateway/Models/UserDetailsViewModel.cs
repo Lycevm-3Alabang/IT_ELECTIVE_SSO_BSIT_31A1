@@ -7,11 +7,13 @@ public class UserDetailsViewModel
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? LastLoginAt { get; set; }
+    public bool IsAdmin { get; set; }
     public List<UserGroupInfo> Groups { get; set; } = new();
 }
 
 public class UserGroupInfo
 {
+    public int GroupId { get; set; }
     public string AppName { get; set; } = string.Empty;
     public string GroupName { get; set; } = string.Empty;
     public int? Level { get; set; }

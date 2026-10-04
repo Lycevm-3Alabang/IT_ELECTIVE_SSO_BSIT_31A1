@@ -1,0 +1,75 @@
+﻿@{
+    ViewData["Title"] = "Sign In";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] | IT ELECTIVE - SSO</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="auth-page">
+        <div class="auth-brand">
+            <div class="logo-mark"></div>
+            <h1>IT ELECTIVE - SSO</h1>
+            <div class="tagline">Centralized Single Sign-On Gateway</div>
+            <div class="pitch">
+                Sign in once.<br />
+                Access your applications securely.
+            </div>
+        </div>
+
+        <div class="auth-panel">
+            <div class="auth-card">
+                <h2>Login</h2>
+                <div class="auth-subtitle">
+                    @if (ViewBag.AppName != null)
+                    {
+                        <span>Login to continue to <strong>@ViewBag.AppName</strong></span>
+                    }
+                    else
+                    {
+                        <span>Login to continue to your application</span>
+                    }
+                </div>
+
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="auth-alert" role="alert">
+                        <strong class="auth-alert-title">Sign-in failed</strong>
+                        <ul class="auth-alert-list">
+                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <li>@error.ErrorMessage</li>
+                            }
+                        </ul>
+                    </div>
+                }
+
+                <form method="post">
+                    <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+
+                    <label for="email" class="form-label">Email address</label>
+                    <input type="email" id="email" name="email" class="form-control"
+                           autocomplete="username" autofocus required />
+
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" id="password" name="password" class="form-control"
+                           autocomplete="current-password" required />
+
+                    <p class="auth-help">
+                        Need an account or forgot your password? Contact your SSO administrator.
+                    </p>
+
+                    <button type="submit" class="btn btn-auth">Login</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

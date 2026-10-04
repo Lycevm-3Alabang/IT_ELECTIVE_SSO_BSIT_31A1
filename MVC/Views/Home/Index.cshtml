@@ -1,0 +1,71 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+
+    var isAuth = User.Identity?.IsAuthenticated == true;
+    var info = isAuth ? UserInfoMapper.FromPrincipal(User) : null;
+    var welcome = isAuth ? $"Welcome, {info!.Email}!" : "Welcome!";
+}
+
+<h4 class="page-heading">@welcome</h4>
+<p class="page-sub">Here's your session overview for the MVC Client App.</p>
+
+@if (ViewBag.Error is string errorMessage)
+{
+    <div class="alert" role="alert">@errorMessage</div>
+}
+
+<div class="stat-grid">
+    <div class="card stat-card">
+        <div class="stat-icon"><i class="bi bi-shield-check"></i></div>
+        <div>
+            <div class="stat-label">Status</div>
+            <div class="stat-value @(isAuth ? "ok" : "")">@(isAuth ? "Signed in" : "Guest")</div>
+        </div>
+    </div>
+
+    <div class="card stat-card">
+        <div class="stat-icon"><i class="bi bi-phone-fill"></i></div>
+        <div>
+            <div class="stat-label">App</div>
+            <div class="stat-value">@(info?.TenantApp ?? "—")</div>
+        </div>
+    </div>
+
+    <div class="card stat-card">
+        <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
+        <div>
+            <div class="stat-label">Groups</div>
+            <div class="stat-value">@(info?.Groups.Length ?? 0)</div>
+        </div>
+    </div>
+
+    <div class="card stat-card">
+        <div class="stat-icon"><i class="bi bi-clock-history"></i></div>
+        <div>
+            <div class="stat-label">Session expires</div>
+            <div class="stat-value">@(info?.ExpiresAt?.ToLocalTime().ToString("MMM d, h:mm tt") ?? "—")</div>
+        </div>
+    </div>
+</div>
+
+<div class="card" style="max-width: 640px;">
+    <div class="card-title">Single Sign-On</div>
+    @if (isAuth)
+    {
+        <p class="muted">You are signed in through the SSO Gateway as <strong>@info!.Email</strong>.</p>
+        <div class="btn-row">
+            <a class="btn" href="/Home/Profile"><i class="bi bi-person-fill"></i> View profile</a>
+            <form method="post" action="/logout" style="display:inline;">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn secondary"><i class="bi bi-box-arrow-right"></i> Logout</button>
+            </form>
+        </div>
+    }
+    else
+    {
+        <p class="muted">You are not signed in. Log in through the SSO Gateway to continue.</p>
+        <div class="btn-row">
+            <a class="btn" href="/login"><i class="bi bi-box-arrow-in-right"></i> Login with SSO</a>
+        </div>
+    }
+</div>

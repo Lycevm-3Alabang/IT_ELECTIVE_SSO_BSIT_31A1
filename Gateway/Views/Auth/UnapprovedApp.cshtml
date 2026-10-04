@@ -1,0 +1,27 @@
+﻿@{
+    ViewData["Title"] = "Unapproved App";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] | IT ELECTIVE - SSO</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="auth-page">
+        <main class="auth-panel">
+            <div class="auth-card">
+                <div class="auth-alert" role="alert">
+                    <strong class="auth-alert-title">Unapproved External App</strong>
+                    <p class="mb-0">This application is not registered with the SSO Gateway, or its return URL is not recognized.</p>
+                </div>
+                <p class="text-muted small mb-0">Please contact your SSO administrator to register the application.</p>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
