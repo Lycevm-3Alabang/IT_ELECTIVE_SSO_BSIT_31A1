@@ -420,6 +420,6 @@ public class UsersController : Controller
         await _auditService.LogAction(user.Id, "PasswordReset", $"Temporary password issued for {user.Email} by admin.");
 
         TempData["TemporaryPassword"] = temporaryPassword;
-        return RedirectToAction(nameof(Details), new { id });
+        return RedirectToAction(nameof(Details), new { id }); // Redirect to details page to show the temporary password in TempData    
     }
 }
