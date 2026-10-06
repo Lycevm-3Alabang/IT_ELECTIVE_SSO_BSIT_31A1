@@ -81,7 +81,7 @@ public class AuthController : Controller
             await _auditService.LogLogin(user?.Id, email, false, user == null ? "User not found" : "Account suspended", ip);
             ModelState.AddModelError("", user != null ? "Account Suspended. Contact your administrator." : "Invalid email or password.");
             return View();
-        }
+        } // Issue 5: "Account Suspended" message and rejecting inactive users
 
         var result = await _signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure: true);
 
@@ -127,14 +127,15 @@ public class AuthController : Controller
 
     [HttpGet]
     [Authorize]
-    public async Task<IActionResult> Portal()
+    
+   public async Task<IActionResult> Portal()
     {
         var user = await _userManager.GetUserAsync(User);
         if (user == null || !user.IsActive)
         {
             await _signInManager.SignOutAsync();
             return RedirectToAction(nameof(Login));
-        }
+        } // Issue 5: "Account Suspended" message and rejecting inactive users
 
         var isAdmin = User.IsInRole(SeedData.AdminRole);
         var apps = await GetAccessibleAppsAsync(user.Id);
