@@ -6,10 +6,11 @@ namespace Gateway.Controllers;
 
 public class HomeController : Controller
 {
-    public IActionResult Index()
-    {
-        return View();
-    }
+    // "/Home" and "/Home/Index" both go to the login page.
+    // (Without explicit routes, "/Home" resolves to Home/Login, because Login is the default action.)
+    [HttpGet("/Home")]
+    [HttpGet("/Home/Index")]
+    public IActionResult Index() => RedirectToAction("Login", "Auth");
 
     public IActionResult Privacy()
     {
