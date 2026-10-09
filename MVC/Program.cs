@@ -12,6 +12,14 @@ if (string.IsNullOrWhiteSpace(sso.SecretKey))
 builder.Services.AddSingleton(sso);
 builder.Services.AddControllersWithViews();
 
+// Antiforgery cookie gets its own name, for the same reason as the session cookie:
+// localhost cookies are shared by every port, so Gateway and MVC must not share a name.
+builder.Services.AddAntiforgery(options => options.Cookie.Name = "mvc.antiforgery");
+
+// TEMPORARY: print why a token check fails (remove once logout works).
+builder.Logging.AddFilter("Microsoft.AspNetCore.Antiforgery", LogLevel.Debug);
+builder.Logging.AddFilter("Microsoft.AspNetCore.Mvc.ViewFeatures", LogLevel.Information);
+
 // The JWT is validated once in AccountController.Callback.
 // After that, this cookie IS the session (it expires together with the JWT).
 builder.Services
@@ -39,6 +47,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
 app.UseRouting();
 
 app.UseAuthentication();

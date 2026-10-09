@@ -43,9 +43,12 @@
             <div class="sidebar-footer">
                 @if (isAuth)
                 {
-                    <a class="nav-link logout" href="/logout">
-                        <i class="bi bi-box-arrow-right"></i> <span>Logout</span>
-                    </a>
+                    <form method="post" action="/logout" class="m-0">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="nav-link logout nav-button">
+                            <i class="bi bi-box-arrow-right"></i> <span>Logout</span>
+                        </button>
+                    </form>
                 }
                 else
                 {

@@ -20,7 +20,7 @@ public class AuthLoginInactiveAccountTests
         Assert.IsType<ViewResult>(result);
         Assert.Contains(
             ctx.Controller.ModelState.Values.SelectMany(v => v.Errors),
-            e => e.ErrorMessage.Contains("Account Suspended"));
+            e => e.ErrorMessage.Contains("Account Suspended"));  //Issue 6: Verify login rejects inactive users.
 
         // Password must never be checked, and no token issued
         ctx.SignInManager.Verify(

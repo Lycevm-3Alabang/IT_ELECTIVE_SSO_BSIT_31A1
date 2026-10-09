@@ -371,3 +371,18 @@ body {
         padding-right: 16px;
     }
 }
+
+/* Logout is a POST form now, so these are <button>s styled like the old links */
+.nav-button {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+button.btn {
+    font: inherit;
+    cursor: pointer;
+}

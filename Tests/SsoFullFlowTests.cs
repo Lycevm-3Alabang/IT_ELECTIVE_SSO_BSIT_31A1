@@ -27,7 +27,11 @@ public class SsoFullFlowTests : IClassFixture<WebApplicationFactory<SsoOptions>>
 
     private readonly WebApplicationFactory<SsoOptions> _factory;
 
-    public SsoFullFlowTests(WebApplicationFactory<SsoOptions> factory) => _factory = factory;
+    public SsoFullFlowTests(WebApplicationFactory<SsoOptions> factory)
+    {
+        Environment.SetEnvironmentVariable("Sso__SecretKey", Secret);
+        _factory = factory;
+    }
 
     // ---- helpers ---------------------------------------------------------------------------
 
@@ -71,7 +75,9 @@ public class SsoFullFlowTests : IClassFixture<WebApplicationFactory<SsoOptions>>
     }
 
     private HttpClient NewClient() =>
-        _factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+        _factory
+            .WithWebHostBuilder(b => b.UseSetting("Sso:SecretKey", Secret))
+            .CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
 
     // ---- tests -----------------------------------------------------------------------------
 

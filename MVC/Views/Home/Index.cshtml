@@ -55,7 +55,10 @@
         <p class="muted">You are signed in through the SSO Gateway as <strong>@info!.Email</strong>.</p>
         <div class="btn-row">
             <a class="btn" href="/Home/Profile"><i class="bi bi-person-fill"></i> View profile</a>
-            <a class="btn secondary" href="/logout"><i class="bi bi-box-arrow-right"></i> Logout</a>
+            <form method="post" action="/logout" style="display:inline;">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn secondary"><i class="bi bi-box-arrow-right"></i> Logout</button>
+            </form>
         </div>
     }
     else
