@@ -88,13 +88,17 @@ else
     </table>
 }
 
-<a class="btn btn-primary me-2" asp-action="Groups" asp-route-userId="@Model.Id">
-    <i class="bi bi-people-fill"></i> Manage Groups
-</a>
-<button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#resetPasswordModal">
-    <i class="bi bi-key-fill"></i> Reset Password
-</button>
-<a asp-action="Index">Back to Users</a>
+<div class="d-flex align-items-center gap-2 flex-wrap">
+    <a class="btn btn-primary" asp-action="Groups" asp-route-userId="@Model.Id">
+        <i class="bi bi-people-fill"></i> Manage Groups
+    </a>
+    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#resetPasswordModal">
+        <i class="bi bi-key-fill"></i> Reset Password
+    </button>
+    <a class="btn btn-outline-secondary" asp-action="Index">
+        <i class="bi bi-arrow-left"></i> Back to Users
+    </a>
+</div>
 
 <!-- Reset Password Modal -->
 <div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
