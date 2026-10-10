@@ -1,15 +1,15 @@
 :root {
-    --sidebar-bg: #2b1c3d;
-    --sidebar-hover: #3c2a54;
-    --sidebar-text: #d9d2e3;
-    --page-bg: #fbf1e3;
+    --sidebar-bg: #0d3b8c;
+    --sidebar-hover: #1a56c4;
+    --sidebar-text: #d6e4ff;
+    --page-bg: #eaf2ff;
     --card-bg: #ffffff;
-    --accent: #2b1c3d;
-    --accent-soft: #ece6d8;
+    --accent: #1a56c4;
+    --accent-soft: #dbe8ff;
     --green: #3fa66d;
-    --text: #2b1c3d;
-    --text-muted: #8b8794;
-    --border: #ece4d4;
+    --text: #0d2a5c;
+    --text-muted: #6b7a99;
+    --border: #cfdcf5;
 }
 
 * {
@@ -55,7 +55,7 @@ body {
     width: 40px;
     height: 40px;
     border-radius: 8px;
-    background-color: #d9d2e3;
+    background-color: #bcd3ff;
     flex-shrink: 0;
 }
 

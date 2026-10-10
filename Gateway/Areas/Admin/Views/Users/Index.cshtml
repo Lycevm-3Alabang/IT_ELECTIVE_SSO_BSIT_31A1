@@ -11,7 +11,7 @@
     <a asp-action="Create" class="btn btn-primary ms-auto">+ Create User</a>
 </form>
 
-<table class="table">
+<table class="table align-middle">
     <thead>
         <tr>
             <th>Email</th>
@@ -38,11 +38,15 @@
                 </td>
                 <td>@user.CreatedAt.ToShortDateString()</td>
                 <td>
-                    <a asp-action="Details" asp-route-id="@user.Id">Details</a>
-                    <button type="button" class="btn btn-link text-danger p-0 ms-2" data-bs-toggle="modal" data-bs-target="#deleteModal"
-                            data-user-id="@user.Id" data-user-email="@user.Email">
-                        Delete
-                    </button>
+                    <div class="d-flex align-items-center gap-2">
+                        <a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@user.Id">
+                            <i class="bi bi-eye"></i> Details
+                        </a>
+                        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                data-user-id="@user.Id" data-user-email="@user.Email">
+                            <i class="bi bi-trash"></i> Delete
+                        </button>
+                    </div>
                 </td>
             </tr>
         }
@@ -61,7 +65,7 @@
     }
 </div>
 
-<!-- Delete confirmation modal (this was missing — the button had nothing to open) -->
+<!-- Delete confirmation modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
