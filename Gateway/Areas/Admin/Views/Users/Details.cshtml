@@ -2,6 +2,7 @@
 @{
     ViewData["Title"] = "User Details";
 }
+
 <h2>User Details</h2>
 
 @if (TempData["TemporaryPassword"] != null)
@@ -22,6 +23,7 @@
         <small class="text-muted d-block mt-1">This password is shown once. The user will be required to change it on next login.</small>
     </div>
 }
+
 <dl>
     <dt>Email</dt>
     <dd>@Model.Email</dd>
@@ -35,6 +37,29 @@
     <dt>Last Login</dt>
     <dd>@(Model.LastLoginAt.HasValue ? Model.LastLoginAt.Value.ToString("g") : "Never logged in")</dd>
 </dl>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+<dl>
+    <dt>Gateway admin</dt>
+    <dd>
+        @(Model.IsAdmin ? "Yes" : "No")
+        <form asp-action="SetAdmin" asp-route-id="@Model.Id" method="post" class="d-inline ms-2">
+            <input type="hidden" name="makeAdmin" value="@((!Model.IsAdmin).ToString().ToLower())" />
+            <button type="submit" class="btn btn-sm btn-outline-secondary">
+                @(Model.IsAdmin ? "Revoke admin" : "Make admin")
+            </button>
+        </form>
+    </dd>
+</dl>
+
 <h4>Group Memberships</h4>
 @if (!Model.Groups.Any())
 {
@@ -62,9 +87,18 @@ else
         </tbody>
     </table>
 }
-<button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#resetPasswordModal">
-    <i class="bi bi-key-fill"></i> Reset Password
-</button><a asp-action="Index">Back to Users</a>
+
+<div class="d-flex align-items-center gap-2 flex-wrap">
+    <a class="btn btn-primary" asp-action="Groups" asp-route-userId="@Model.Id">
+        <i class="bi bi-people-fill"></i> Manage Groups
+    </a>
+    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#resetPasswordModal">
+        <i class="bi bi-key-fill"></i> Reset Password
+    </button>
+    <a class="btn btn-outline-secondary" asp-action="Index">
+        <i class="bi bi-arrow-left"></i> Back to Users
+    </a>
+</div>
 
 <!-- Reset Password Modal -->
 <div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">

@@ -47,20 +47,22 @@ public class LoginPageFlowTests
     }
 
     [Fact]
-    public async Task Post_ValidLoginWithoutReturnUrl_RedirectsToAdminDashboard()
+    public async Task Post_ValidLoginWithoutReturnUrl_RedirectsToPortal()
     {
         var ctx = new AuthTestContext();
         var user = ctx.AddUser();
+
         ctx.SignInManager
             .Setup(m => m.CheckPasswordSignInAsync(user, "Password1!", true))
             .ReturnsAsync(IdentitySignInResult.Success);
 
         var result = await ctx.Controller.Login(user.Email!, "Password1!", null);
 
+        // No client app involved -> Portal decides: admins get the chooser,
+        // regular users go straight to their app.
         var redirect = Assert.IsType<RedirectToActionResult>(result);
-        Assert.Equal("Index", redirect.ActionName);
-        Assert.Equal("Dashboard", redirect.ControllerName);
-        Assert.Equal("Admin", redirect.RouteValues!["area"]);
+        Assert.Equal("Portal", redirect.ActionName);
+        Assert.Null(redirect.ControllerName);   // same controller (Auth)
     }
 
     [Fact]

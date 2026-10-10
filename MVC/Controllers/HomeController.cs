@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.Mvc;
 using MvcClientApp.Services;
 
@@ -18,14 +17,18 @@ public class HomeController : Controller
 
     public IActionResult Index(string? error)
     {
-        if (HttpContext.Items.ContainsKey(SsoOptions.ExpiredFlag)) error = "expired";
-
         ViewBag.Error = error != null && ErrorMessages.TryGetValue(error, out var message) ? message : null;
         return View();
     }
 
     [Authorize]
     public IActionResult Profile() => View(UserInfoMapper.FromPrincipal(User));
+
+    // Proves roles work: only users with a level-0 group (Admin role) get in.
+    [Authorize(Roles = SsoTokenRules.AdminRole)]
+    public IActionResult AdminOnly() => View();
+
+    public IActionResult AccessDenied() => View();
 
     public IActionResult Error() => View();
 }

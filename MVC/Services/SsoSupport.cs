@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using Microsoft.IdentityModel.Tokens;
@@ -22,6 +23,7 @@ public class SsoOptions
 
     public string GatewayLoginUrl =>
         $"{BaseUrl.TrimEnd('/')}/Auth/Login?returnUrl={Uri.EscapeDataString(CallbackUrl)}";
+    public string GatewayLogoutUrl => $"{BaseUrl.TrimEnd('/')}/Auth/Logout";
 
     public TokenValidationParameters CreateValidationParameters() => new()
     {
@@ -40,6 +42,9 @@ public class SsoOptions
 
 public static class SsoTokenRules
 {
+    public const string AdminRole = "Admin";
+    public const string UserRole = "User";
+
     // Para hindi gumana dito ang token na para sa ibang tenant app
     public static bool IsIssuedForApp(ClaimsPrincipal? principal, string expectedApp) =>
         string.Equals(principal?.FindFirst("tenant_app")?.Value, expectedApp, StringComparison.OrdinalIgnoreCase);
@@ -47,6 +52,48 @@ public static class SsoTokenRules
     // Dapat may kahit isang group ang user para sa app na ito
     public static bool HasAppAccess(ClaimsPrincipal? principal) =>
         !string.IsNullOrWhiteSpace(principal?.FindFirst("groups")?.Value);
+
+    // Level 0 = highest power (same rule as the Gateway). Everyone is a User; level 0 adds Admin.
+    public static IEnumerable<string> RolesFromLevels(string? levelsJson)
+    {
+        var roles = new List<string> { UserRole };
+        if (!string.IsNullOrWhiteSpace(levelsJson))
+        {
+            try
+            {
+                var levels = JsonSerializer.Deserialize<Dictionary<string, int>>(levelsJson);
+                if (levels != null && levels.Values.Any(l => l == 0))
+                    roles.Add(AdminRole);
+            }
+            catch (JsonException) { }
+        }
+        return roles;
+    }
+
+    // Builds the identity stored in MVC's session cookie from the already-validated JWT.
+    public static ClaimsIdentity BuildSessionIdentity(ClaimsIdentity validated, DateTimeOffset expiresAt)
+    {
+        string Get(string type) => validated.FindFirst(type)?.Value ?? "";
+
+        var email = Get("email");
+        var levels = Get("levels");
+        if (string.IsNullOrWhiteSpace(levels)) levels = "{}";
+
+        var claims = new List<Claim>
+        {
+            new("sub", Get("sub")),
+            new("email", email),
+            new(ClaimTypes.Name, email),
+            new("tenant_app", Get("tenant_app")),
+            new("groups", Get("groups")),
+            new("levels", levels),
+            new("exp", expiresAt.ToUnixTimeSeconds().ToString())
+        };
+        claims.AddRange(RolesFromLevels(levels).Select(r => new Claim(ClaimTypes.Role, r)));
+
+        return new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme,
+            ClaimTypes.Name, ClaimTypes.Role);
+    }
 }
 
 public record UserInfoResponse(

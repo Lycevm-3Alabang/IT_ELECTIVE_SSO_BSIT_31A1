@@ -32,14 +32,23 @@
                 <a class="nav-link @(IsActive("Profile") ? "active" : "")" href="/Home/Profile">
                     <i class="bi bi-person-fill"></i> <span>Profile</span>
                 </a>
+                @if (User.IsInRole("Admin"))
+                {
+                    <a class="nav-link @(IsActive("AdminOnly") ? "active" : "")" href="/Home/AdminOnly">
+                        <i class="bi bi-shield-lock-fill"></i> <span>Admin Panel</span>
+                    </a>
+                }
             </nav>
 
             <div class="sidebar-footer">
                 @if (isAuth)
                 {
-                    <a class="nav-link logout" href="/logout">
-                        <i class="bi bi-box-arrow-right"></i> <span>Logout</span>
-                    </a>
+                    <form method="post" action="/logout" class="m-0">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="nav-link logout nav-button">
+                            <i class="bi bi-box-arrow-right"></i> <span>Logout</span>
+                        </button>
+                    </form>
                 }
                 else
                 {
@@ -57,7 +66,7 @@
                     <i class="bi bi-person-circle topbar-avatar"></i>
                     <div>
                         <div class="topbar-user-name">@(me?.Email ?? "Guest")</div>
-                        <div class="topbar-user-role">@(me?.TenantApp ?? "Not signed in")</div>
+                        <div class="topbar-user-role">@(isAuth ? (User.IsInRole("Admin") ? "Admin" : "User") : "Not signed in")</div>
                     </div>
                 </div>
             </header>
